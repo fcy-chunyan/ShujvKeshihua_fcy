@@ -1,0 +1,68 @@
+import os
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+from matplotlib.patches import Wedge
+from matplotlib import font_manager
+
+font_path1 = r"C:\Windows\Fonts\msyhbd.ttc"  
+font_prop1 = font_manager.FontProperties(fname=font_path1)
+font_path2 = r"C:\Windows\Fonts\msyh.ttc"  
+font_prop2 = font_manager.FontProperties(fname=font_path2)
+
+plt.rcParams["axes.unicode_minus"] = False
+fig, ax = plt.subplots(figsize=(8.65, 6.2), dpi=100)
+fig.patch.set_facecolor("#1d2148")
+ax.set_facecolor("#1d2148")
+ax.set_xlim(0, 8.65)
+ax.set_ylim(0, 6.2)
+ax.axis("off")
+
+ax.text(
+    -0.5, 6.52, "2022年上半年目标完成率",
+    color="white", fontsize=27, fontweight="bold",
+    ha="left", va="center", fontproperties=font_prop1
+)
+
+ax.text(
+    -0.5, 5.88, "截至6月30日销售目标总体完成率达到85%",
+    color="white", fontsize=20,
+    ha="left", va="center", fontproperties=font_prop2
+)
+
+center = (4.38, 3.22)
+radius, width = 1.74, 0.18
+
+ax.add_patch(Wedge(
+    center, radius, 0, 360, width=width,
+    facecolor="#303558", edgecolor="none"
+))
+
+for start, end, color in [
+    (205, 300, "#ed4b75"),
+    (300, 420, "#c13b94"),
+    (420, 511, "#8732ad"),
+]:
+    ax.add_patch(Wedge(
+        center, radius, start, end,
+        width=width, facecolor=color, edgecolor="none"
+    ))
+
+ax.text(
+    center[0], center[1] + 0.08, "85%",
+    color="white", fontsize=50,
+    ha="center", va="center"
+)
+
+ax.text(
+    center[0], center[1] - 0.67, "目标完成率",
+    color="white", fontsize=15,
+    ha="center", va="center", fontproperties=font_prop2
+)
+
+ax.text(
+    -1, -0.5, "*注：数据来源于公司销售系统",
+    color="white", fontsize=12,
+    ha="left", va="center", fontproperties=font_prop2
+)
+
+plt.show()

@@ -1,0 +1,61 @@
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.patches import FancyBboxPatch
+
+plt.rcParams["font.sans-serif"] = ["Microsoft YaHei", "SimHei", "Noto Sans CJK SC", "DejaVu Sans"]
+plt.rcParams["axes.unicode_minus"] = False
+
+quarters = ["2021Q1", "Q2", "Q3", "Q4", "2022Q1", "Q2"]
+sales = [3121, 4086, 4321, 4601, 4936, 4231]
+profits = [1020, 1421, 1502, 1623, 1781, 1432]
+
+fig, ax = plt.subplots(figsize=(12, 8), dpi=100)
+fig.patch.set_facecolor("#1d2348")
+ax.set_facecolor("#1d2348")
+x = np.arange(len(quarters))
+width = 0.25
+
+sales_bars = ax.bar(x - width / 2, sales, width, color="#0878bd")
+profit_bars = ax.bar(x + width / 2 - 0.02, profits, width, color="#e94868")
+
+fig.text(0.06, 0.92, "2021年至今季度销售额(万)和利润额(万)",
+		 color="white", fontsize=25, fontweight="bold")
+fig.text(0.06, 0.865, "2022年第二季度销售额首次出现下降，降幅达到15%",
+		 color="white", fontsize=17)
+
+ax.set_ylim(0, 5700)
+ax.set_xlim(-0.55, 5.45)
+ax.set_xticks(x)
+ax.set_xticklabels(quarters, color="white", fontsize=11)
+ax.tick_params(axis="x", length=0, pad=12)
+ax.tick_params(axis="y", left=False, labelleft=False)
+for spine in ax.spines.values():
+	spine.set_visible(False)
+ax.axhline(0, color="#596078", linewidth=1.5)
+
+for bars in (sales_bars, profit_bars):
+	for bar in bars:
+		ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 135,
+				str(int(bar.get_height())), ha="center", va="bottom",
+				color="white", fontsize=11)
+
+sales_label_box = FancyBboxPatch((0.88, 0.47), 0.09, 0.05,
+		boxstyle="square,pad=0.0", facecolor="#1d2348",
+		edgecolor="#008bd2", linewidth=1.5, mutation_aspect=1.0,
+		transform=ax.transAxes)
+profit_label_box = FancyBboxPatch((0.88, 0.355), 0.09, 0.05,
+		boxstyle="square,pad=0.0", facecolor="#1d2348",
+		edgecolor="#f04469", linewidth=1.5, mutation_aspect=1.0,
+		transform=ax.transAxes)
+ax.add_patch(sales_label_box)
+ax.add_patch(profit_label_box)
+
+ax.text(0.925, 0.495, "销售额", transform=ax.transAxes, color="white",
+		fontsize=10, ha="center", va="center")
+ax.text(0.925, 0.38, "利润额", transform=ax.transAxes, color="white",
+		fontsize=10, ha="center", va="center")
+
+fig.text(0.05, 0.04, "*注：数据来源于公司销售系统，统计日期截至2022.06.30",
+		 color="white", fontsize=12)
+plt.subplots_adjust(left=0.09, right=0.91, top=0.78, bottom=0.16)
+plt.show()

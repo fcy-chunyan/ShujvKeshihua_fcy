@@ -1,0 +1,58 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.patches import FancyBboxPatch
+
+plt.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'Noto Sans CJK SC', 'DejaVu Sans']
+plt.rcParams['axes.unicode_minus'] = False
+
+labels = ['口红', '面膜', '隔离', '防晒', '精华', '面霜']
+values = [653, 523, 648, 856, 714, 785]
+fig, ax = plt.subplots(figsize=(8.68, 6.18), dpi=100)
+fig.patch.set_facecolor('#1d234b')
+ax.set_facecolor('#1d234b')
+fig.subplots_adjust(left=.14, right=.94, top=.73, bottom=.17)
+
+fig.text(.073, .915, '3月商品销量对比', color='white', fontsize=31,
+		 fontweight='bold', ha='left', va='center')
+fig.text(.073, .838, '防晒销量最多，3月销量856；面膜最少，3月销量523',
+		 color='white', fontsize=23, ha='left', va='center')
+
+ax.set_xlim(-.55, 5.55)
+ax.set_ylim(0, 1200)
+ax.set_xticks(range(6), labels, color='white', fontsize=13)
+ax.set_yticks(np.arange(0, 1201, 200))
+ax.set_yticklabels(np.arange(0, 1201, 200), color='white', fontsize=11)
+ax.tick_params(length=0, pad=8)
+for spine in ax.spines.values():
+	spine.set_visible(False)
+ax.grid(axis='y', color='#656a88', linestyle=(0, (8, 5)), linewidth=1.2, alpha=.65)
+ax.set_axisbelow(True)
+
+bar_cmap = LinearSegmentedColormap.from_list('bar', ['#0756a7', '#08e4e6'])
+width = .19
+for x, value in enumerate(values):
+	clip = FancyBboxPatch((x - width / 2, 0), width, value,
+						  boxstyle='round,pad=0,rounding_size=.045',
+						  facecolor='none', edgecolor='none')
+	ax.add_patch(clip)
+	gradient = np.linspace(0, 1, 300).reshape(-1, 1)
+	image = ax.imshow(gradient, extent=(x - width / 2, x + width / 2, 0, value),
+					  origin='lower', aspect='auto', cmap=bar_cmap, zorder=3)
+	image.set_clip_path(clip)
+
+	top = value + 60
+	marker_color = '#4c9bd7'
+	ax.plot([x, x], [value, top], color=marker_color, linewidth=1.2, zorder=4)
+	label_box = FancyBboxPatch((x - .16, top - 34), .62, 68,
+								   boxstyle='round,pad=.02,rounding_size=.2',
+							   facecolor='#123465', edgecolor='none', zorder=4)
+	ax.add_patch(label_box)
+	ax.scatter(x, top, s=62, color=marker_color, zorder=6)
+	ax.text(x + .2, top, str(value), color='#dcecff', fontsize=11,
+			ha='center', va='center', zorder=7)
+
+fig.text(.061, .055, '*注：数据来源于公司销售系统，统计日期截至2022.03.31',
+		 color='white', fontsize=11, ha='left', va='center')
+fig.canvas.draw()
+plt.show()

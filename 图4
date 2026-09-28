@@ -1,0 +1,67 @@
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.patches import Polygon
+plt.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', 'SimHei', 'Arial Unicode MS']
+plt.rcParams['axes.unicode_minus'] = False
+categories = ['口红', '面膜', '隔离', '防晒', '精华', '面霜', '眼影', '气垫']
+values = [9221, 5102, 6571, 5760, 6321, 8612, 2645, 5321]
+colors = ['#8ec7d5', '#5aa8b3', '#f17d5e', '#f0b23a', '#4d9ad2', '#2e7dd8', '#6d5cc9', '#7e6bd1']
+
+fig, ax = plt.subplots(figsize=(8.67, 6.2), dpi=100)
+fig.patch.set_facecolor('#0d1d34')
+ax.set_facecolor('#0d1d34')
+x = np.arange(len(categories))
+bar_width = 0.58
+bars = ax.bar(x, values, width=bar_width, color=colors, edgecolor='none')
+
+ax.set_ylim(0, 10000)
+ax.set_yticks(np.arange(0, 10001, 2000))
+ax.set_yticklabels([f'{int(v):d}' for v in np.arange(0, 10001, 2000)], fontsize=12, color='#dfe7f4')
+ax.set_xticks(x)
+ax.set_xticklabels(categories, fontsize=15, color='#ecf1fa')
+
+ax.yaxis.grid(True, linestyle='--', linewidth=1.2, color='#7ea6c5', alpha=0.45)
+ax.xaxis.grid(False)
+
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.spines['left'].set_color('#dfe7f4')
+ax.spines['bottom'].set_color('#dfe7f4')
+ax.spines['left'].set_linewidth(0.8)
+ax.spines['bottom'].set_linewidth(0.8)
+
+fig.text(0.067, 0.925, '2021年商品销量情况', ha='left', va='top',
+         fontsize=31, color='#f2f5f9', fontweight='bold')
+fig.text(0.067, 0.832, '口红销量最好达9221，是眼影最低值2645近3.5倍',
+         ha='left', va='top', fontsize=23, color='#f2f5f9')
+
+for index, (rect, val, color) in enumerate(zip(bars, values, colors)):
+    label_y = val + 430
+    bar_alpha = rect.get_alpha() if rect.get_alpha() is not None else 1.0
+    bar_center = rect.get_x() + rect.get_width() / 2
+    pointer_offset = -rect.get_width() * 0.16 if index % 2 == 0 else rect.get_width() * 0.16
+    ax.add_patch(Polygon(
+        [[bar_center + pointer_offset - rect.get_width() * 0.15, label_y],
+         [bar_center + pointer_offset + rect.get_width() * 0.15, label_y],
+         [bar_center, label_y - 360]],
+        closed=True,
+        facecolor=color,
+        edgecolor='none',
+        alpha=bar_alpha,
+        zorder=3,
+    ))
+    ax.text(
+        rect.get_x() + rect.get_width() / 2,
+        label_y,
+        f'{val}',
+        ha='center',
+        va='bottom',
+        fontsize=11,
+        color='white',
+        bbox=dict(boxstyle='square,pad=0.25', fc=color, alpha=bar_alpha, ec='none')
+    )
+
+    ax.set_position([0.145, 0.165, 0.78, 0.535])
+
+    fig.text(0.06, 0.04, '注：数据来源于公司销售系统，统计日期截至2022.08.31', fontsize=11, color='#a8bad1', ha='left')
+plt.show()

@@ -1,0 +1,64 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+plt.rcParams["font.sans-serif"] = [
+    "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB",
+    "Noto Sans CJK SC", "SimHei", "Arial Unicode MS", "DejaVu Sans"
+]
+plt.rcParams["axes.unicode_minus"] = False
+
+fig, ax = plt.subplots(figsize=(13.82, 5.81), dpi=100)
+background = "#1d234a"
+fig.patch.set_facecolor(background)
+ax.set_facecolor(background)
+ax.set_position([0.04, 0.14, 0.92, 0.68])
+ax.set_xlim(0, 100)
+ax.set_ylim(0, 100)
+ax.axis("off")
+
+fig.text(
+    0.08, 0.90,
+    "2022年第一季度销售目标完成情况",
+    ha="left", va="center",
+    fontsize=29, fontweight="bold", color="white"
+)
+fig.text(
+    0.08, 0.82,
+    "华东区域完成率最高达到36%，但是相比去年约42%有所下降",
+    ha="left", va="center",
+    fontsize=18, color="white"
+)
+
+rows = [
+    ("华东", 36, 42),
+    ("西北", 31, 26),
+    ("东北", 18, 19),
+    ("华北", 13, 12),
+    ("华南", 9, 5),
+]
+ys = [76, 62, 48, 34, 20]
+
+gap = 0.74
+left_origin = 43
+right_origin = 57
+for (region, left_value, right_value), y in zip(rows, ys):
+    left_x = left_origin - np.arange(left_value) * gap
+    right_x = right_origin + np.arange(right_value) * gap
+
+    for x in left_x:
+        ax.vlines(x, y - 3.3, y + 3.3, color="#5aa9ff", linewidth=1.5, alpha=0.92)
+    for x in right_x:
+        ax.vlines(x, y - 3.3, y + 3.3, color="#ff5d5d", linewidth=1.5, alpha=0.92)
+
+    ax.text(12, y, f"{left_value}%", ha="right", va="center", fontsize=18, color="white")
+    ax.text(50, y, region, ha="center", va="center", fontsize=18, color="white")
+    ax.text(88, y, f"{right_value}%", ha="left", va="center", fontsize=18, color="white")
+
+fig.text(
+    0.08, 0.06,
+    "*注：数据来源于公司销售系统，统计日期截至2022.03.31",
+    ha="left", va="center",
+    fontsize=11, color="#dfeaff"
+)
+
+plt.show()

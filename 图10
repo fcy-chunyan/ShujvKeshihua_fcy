@@ -1,0 +1,57 @@
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+from matplotlib.ticker import FuncFormatter
+from matplotlib import font_manager
+from datetime import datetime
+
+font_path = r"C:\Windows\Fonts\simhei.ttf"
+font_manager.fontManager.addfont(font_path)
+plt.rcParams["font.sans-serif"] = [font_manager.FontProperties(fname=font_path).get_name()]
+plt.rcParams["axes.unicode_minus"] = False
+
+
+tasks = ["制定计划", "方案设计", "资源调配", "第一阶段", "第二阶段", "第三阶段", "项目总结"]
+start = ["2022-03-01", "2022-03-13", "2022-03-22", "2022-04-02", "2022-04-16", "2022-05-11", "2022-05-26"]
+end = ["2022-03-12", "2022-03-21", "2022-04-01", "2022-04-15", "2022-05-10", "2022-05-25", "2022-06-02"]
+percent = [51, 32, 21, 85, 36, 68, 68]
+start = [datetime.strptime(x, "%Y-%m-%d") for x in start]
+end = [datetime.strptime(x, "%Y-%m-%d") for x in end]
+
+background = "#1b2148"
+fig, ax = plt.subplots(figsize=(9.22, 5.92), dpi=100)
+fig.patch.set_facecolor(background)
+ax.set_facecolor(background)
+y = range(len(tasks))
+
+# 每个任务的总工期，以及已完成部分
+for i, (s, e, p) in enumerate(zip(start, end, percent)):
+	days = (e - s).days
+	ax.barh(i, days, left=s, height=0.43, color="#0878c5", edgecolor="none")
+	ax.barh(i, days * p / 100, left=s, height=0.43,
+			color="#08a8df", edgecolor="none")
+	ax.text(s + (e - s) / 2, i, f"{p}%", color="white", fontsize=10,
+			ha="center", va="center")
+
+ax.set_yticks(list(y))
+ax.set_yticklabels(tasks, color="white", fontsize=12)
+ax.invert_yaxis()
+
+ticks = [datetime(2022, 3, 1), datetime(2022, 3, 16), datetime(2022, 3, 31),
+		 datetime(2022, 4, 15), datetime(2022, 4, 30), datetime(2022, 5, 15),
+		 datetime(2022, 5, 30), datetime(2022, 6, 14)]
+ax.set_xlim(datetime(2022, 2, 20), datetime(2022, 6, 25))
+ax.set_xticks(ticks)
+ax.xaxis.set_major_formatter(FuncFormatter(
+	lambda value, pos: f"{mdates.num2date(value).year}/{mdates.num2date(value).month}/{mdates.num2date(value).day}"))
+ax.xaxis.tick_top()
+ax.tick_params(axis="x", colors="white", labelsize=10, length=0,
+		       pad=10, top=True, bottom=False, labeltop=True, labelbottom=False)
+ax.tick_params(axis="y", colors="white", length=0, pad=10)
+ax.grid(axis="x", color="#aeb1c3", linestyle=(0, (7, 6)), linewidth=1.2, alpha=0.65)
+ax.set_axisbelow(True)
+for spine in ax.spines.values():
+	spine.set_visible(False)
+ax.set_title("2022年化妆品类目采购项目进度", color="white",
+			 fontsize=23, fontweight="bold", pad=14)
+plt.subplots_adjust(left=0.17, right=0.98, top=0.84, bottom=0.06)
+plt.show()

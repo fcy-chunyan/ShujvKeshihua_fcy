@@ -1,0 +1,40 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.patches import Circle, Rectangle
+
+plt.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'Noto Sans CJK SC', 'DejaVu Sans']
+plt.rcParams['axes.unicode_minus'] = False
+
+fig, ax = plt.subplots(figsize=(8.66, 6.23), dpi=100)
+fig.patch.set_facecolor('#1b2147')
+ax.set_facecolor('#1b2147')
+ax.set_xlim(0, 866)
+ax.set_ylim(0, 623)
+ax.axis('off')
+
+ax.text(60, 556, '2022年上半年目标完成率', color='white', fontsize=32,
+        fontweight='bold', va='center')
+ax.text(60, 514, '截至6月30日销售目标总体完成率达到65%', color='white',
+        fontsize=22, va='center')
+
+cx, cy, radius = 407, 274, 166
+blue = '#0877c1'
+
+water_level = cy - radius + 2 * radius * 0.65
+water = Rectangle((cx - radius, cy - radius),
+                  2 * radius, water_level - (cy - radius),
+                  facecolor=blue, edgecolor='none')
+ax.add_patch(water)
+clip_circle = Circle((cx, cy), radius - 13, transform=ax.transData)
+water.set_clip_path(clip_circle)
+ax.add_patch(Circle((cx, cy), radius, fill=False, linewidth=3,
+                    edgecolor=blue))
+ax.add_patch(Circle((cx, cy), radius - 13, fill=False, linewidth=4,
+                    edgecolor=blue))
+ax.text(cx, cy + 10, '65%', color='white', fontsize=50,
+        ha='center', va='center', fontweight='normal')
+ax.text(50, 37, '*注：数据来源于公司销售系统', color='white', fontsize=12,
+        va='center')
+
+plt.tight_layout(pad=0)
+plt.show()

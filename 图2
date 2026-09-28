@@ -1,0 +1,50 @@
+import matplotlib.pyplot as plt
+import numpy as np
+
+plt.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'Arial Unicode MS', 'DejaVu Sans']
+plt.rcParams['axes.unicode_minus'] = False
+
+regions = ['华北', '华南', '东北', '西北', '西南', '华东']
+values = np.array([2354, 1902, 3524, 2698, 2896, 2563])
+average = 2656
+
+fig, ax = plt.subplots(figsize=(8.67, 5.97), dpi=100)
+fig.patch.set_facecolor('#1d2148')
+ax.set_facecolor('#1d2148')
+
+x = np.arange(len(regions))
+bars = ax.bar(x, values, width=0.31, color='#0878be', zorder=2)
+ax.axhline(average, color='#ffc000', linewidth=2.2, zorder=3)
+
+fig.text(0.071, 0.885, '3月各区域销量分布', color='white', fontsize=31,
+		 fontweight='bold', ha='left')
+fig.text(0.071, 0.802, '东北销量最多占比总销量的22%，华南销量最低',
+		 color='white', fontsize=23, ha='left')
+
+for i, (bar, value) in enumerate(zip(bars, values)):
+	cx = bar.get_x() + bar.get_width() / 2
+	if i == len(values) - 1:
+		ax.text(cx, value - 120, str(value), ha='center', va='center',
+				color='white', fontsize=11,
+				bbox=dict(facecolor='#0878be', edgecolor='none', pad=1.5))
+	else:
+		ax.text(cx, value + 130, str(value), ha='center', va='bottom',
+				color='white', fontsize=11)
+
+ax.text(5.0, average + 115, '平均值：2656', color='#ffc000', fontsize=12,
+		ha='left', va='bottom')
+ax.set_xlim(-0.5, 5.5)
+ax.set_ylim(0, 4100)
+ax.set_xticks(x, regions, color='white', fontsize=13)
+ax.tick_params(axis='x', length=0, pad=10)
+ax.tick_params(axis='y', left=False, labelleft=False)
+for spine in ax.spines.values():
+	spine.set_visible(False)
+ax.spines['bottom'].set_visible(True)
+ax.spines['bottom'].set_color('#9da0b2')
+ax.spines['bottom'].set_linewidth(1.5)
+
+fig.text(0.064, 0.049, '*注：数据来源于公司销售系统，统计日期截至2022.03.31',
+		 color='white', fontsize=11, ha='left')
+plt.subplots_adjust(left=0.063, right=0.965, top=0.76, bottom=0.165)
+plt.show()

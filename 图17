@@ -1,0 +1,55 @@
+import matplotlib.pyplot as plt
+from matplotlib.patches import Wedge
+
+plt.rcParams["font.sans-serif"] = [
+    "Microsoft YaHei", "SimHei", "Noto Sans CJK SC", "Arial Unicode MS"
+]
+plt.rcParams["axes.unicode_minus"] = False
+
+fig, ax = plt.subplots(figsize=(8.65, 5.93), dpi=100)
+background = "#1b1f49"
+fig.patch.set_facecolor(background)
+ax.set_facecolor(background)
+ax.set_xlim(0, 865)
+ax.set_ylim(0, 593)
+ax.axis("off")
+
+ax.text(58, 558, "2022年上半年年龄分布", color="white", fontsize=29,
+        fontweight="bold", va="top")
+ax.text(58, 509, "公司平均年龄32.5，23-30员工比例最高", color="white",
+        fontsize=21, va="top")
+
+center = (438, 248)
+outer_radius = 180
+ring_width = 27
+ring_step = 29
+colors = ["#e74768", "#f6c453", "#10a2aa", "#3ca8df"]
+percentages = [37.5, 29.2, 20.8, 12.5]
+
+start_angle = 90 
+FULL = 50        
+
+for index, (percent, color) in enumerate(zip(percentages, colors)):
+    radius = outer_radius - index * ring_step
+    span = percent / FULL * 360     
+    end_angle = start_angle - span   
+    ax.add_patch(Wedge(center, radius, end_angle, start_angle,
+                       width=ring_width,
+                       facecolor=color,
+                       edgecolor=background,
+                       linewidth=2))
+
+for y, label in zip((414, 384, 354, 324),
+                    ("[20,30)", "[30,40)", "[40,50)", ">=50")):
+    ax.text(420, y, label, color="white", fontsize=16,
+            ha="right", va="center")
+for x, y, text in ((273, 270, "37.5%"), (351, 149, "29.2%"),
+                   (464, 149, "20.8%"), (508, 230, "12.5%")):
+    ax.text(x, y, text, color="white", fontsize=14,
+            ha="center", va="center")
+
+ax.text(53, 30, "*注：数据来源于公司人力资源系统，统计日期截至2022.06.30",
+        color="white", fontsize=12, va="bottom")
+
+plt.tight_layout(pad=0)
+plt.show()

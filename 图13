@@ -1,0 +1,96 @@
+import matplotlib.pyplot as plt
+from matplotlib import font_manager
+
+font_path1 = r"C:\Windows\Fonts\msyhbd.ttc"  
+font_prop1 = font_manager.FontProperties(fname=font_path1)
+font_path2 = r"C:\Windows\Fonts\msyh.ttc"  
+font_prop2 = font_manager.FontProperties(fname=font_path2)
+
+plt.rcParams["axes.unicode_minus"] = False
+
+months = ["1月", "2月", "3月", "4月", "5月", "6月"]
+sales_2021 = [1686, 1345, 1934, 1658, 1865, 1936]
+sales_2022 = [1385, 1846, 1654, 1936, 2564, 2236]
+
+fig, ax = plt.subplots(figsize=(12, 8.6), dpi=100)
+fig.patch.set_facecolor("#1c2149")
+ax.set_facecolor("#1c2149")
+ax.plot(
+    months, sales_2021,
+    color="#f04b70", linewidth=2.5,
+    marker="o", markersize=6,
+    label="2021年"
+)
+
+ax.plot(
+    months, sales_2022,
+    color="#0878c9", linewidth=2.5,
+    marker="o", markersize=6,
+    label="2022年"
+)
+
+ax.set_ylim(0, 3200)
+ax.set_yticks(range(0, 3001, 500))
+ax.grid(axis="y", linestyle=(0, (7, 5)), linewidth=1.2, color="#646983")
+for spine in ax.spines.values():
+    spine.set_visible(False)
+ax.tick_params(axis="x", colors="white", labelsize=12, length=0, pad=10)
+ax.tick_params(axis="y", colors="white", labelsize=11, length=0, pad=10)
+for label in ax.get_xticklabels() + ax.get_yticklabels():
+    label.set_fontproperties(font_prop2)
+
+fig.text(
+    0.068, 0.87,
+    "2022年上半年各月同比去年销量",
+    color="white", fontsize=29, fontweight="bold",
+    fontproperties=font_prop1
+)
+
+fig.text(
+    0.068, 0.805,
+    "上半年同比去年增长明显，5月份同比增长最多，增长近40%",
+    color="white", fontsize=17,
+    fontproperties=font_prop2
+)
+
+legend = ax.legend(
+    loc="upper right",
+    bbox_to_anchor=(0.985, 1.08),
+    ncol=2,
+    frameon=False,
+    fontsize=12,
+    handlelength=2.2,
+    columnspacing=1.5
+)
+
+for text in legend.get_texts():
+    text.set_color("white")
+    text.set_fontproperties(font_prop2)
+
+def add_labels(values, color, offsets):
+    for i, (value, offset) in enumerate(zip(values, offsets)):
+        ax.annotate(
+            str(value),
+            (i, value),
+            xytext=(0, offset),
+            textcoords="offset points",
+            ha="center",
+            va="center",
+            color="white",
+            fontsize=11,
+            fontproperties=font_prop2
+        )
+
+add_labels(sales_2021, "#f04b70", [22, -25, 22, -25, -25, -25])
+add_labels(sales_2022, "#0878c9", [-28, 22, -28, 22, 22, 22])
+
+fig.text(
+    0.065, 0.045,
+    "*注：数据来源于公司销售系统，统计日期截至2022.06.30",
+    color="white", fontsize=11,
+    fontproperties=font_prop2
+)
+
+plt.subplots_adjust(left=0.13, right=0.95, top=0.72, bottom=0.17)
+
+plt.show()

@@ -1,0 +1,53 @@
+import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
+from matplotlib import font_manager
+
+font_names = ["Microsoft YaHei", "SimHei", "Noto Sans CJK SC", "Arial Unicode MS"]
+available = {f.name for f in font_manager.fontManager.ttflist}
+font_name = next((name for name in font_names if name in available), "DejaVu Sans")
+plt.rcParams["font.family"] = font_name
+plt.rcParams["axes.unicode_minus"] = False
+
+fig = plt.figure(figsize=(8.67, 5.91), dpi=100, facecolor="#1b2048")
+ax = fig.add_axes([0, 0, 1, 1], facecolor="#1b2048")
+ax.set_xlim(0, 867)
+ax.set_ylim(591, 0)
+ax.axis("off")
+
+white = "#f7f7f7"
+dark_blue = "#104187"
+light_blue = "#82acd4"
+red = "#a53c57"
+
+ax.text(57, 76, "2021年各区域销量及同比情况", color=white,
+	fontsize=26, fontweight="bold", va="center")
+ax.text(57, 120, "各区域商品销量同比去年均有下降，其中华南下降最多，同比下降20.8%",
+	color=white, fontsize=16, va="center")
+
+regions = ["华东", "西南", "西北", "东北", "华南", "华北"]
+sales = [2109, 1369, 1872, 1536, 1946, 4321]
+rates = ["-5.8%", "-17.9%", "-15.9%", "-9.3%", "-20.8%", "-13.6%"]
+ys = [177, 237, 296, 356, 415, 475]
+bar_h = 46
+x0, x_end, x_red = 112, 747, 620
+max_sales = max(sales)
+
+for region, sale, rate, y in zip(regions, sales, rates, ys):
+    dark_w = (x_red - x0) * sale / max_sales
+    ax.add_patch(Rectangle((x0, y), dark_w, bar_h, facecolor=dark_blue, edgecolor="none"))
+    ax.add_patch(Rectangle((x0 + dark_w, y), x_red - x0 - dark_w, bar_h,
+			   facecolor=light_blue, edgecolor="none"))
+    ax.add_patch(Rectangle((x_red, y), x_end - x_red, bar_h,
+			   facecolor=red, edgecolor="none"))
+
+    ax.text(99, y + bar_h / 2, region, color=white, fontsize=16,
+	    ha="right", va="center")
+    ax.text(x0 + dark_w - 14, y + bar_h / 2, str(sale), color=white,
+	    fontsize=16, ha="right", va="center")
+    ax.text((x_red + x_end) / 2, y + bar_h / 2, rate, color=white,
+	    fontsize=16, ha="center", va="center")
+
+ax.text(48, 558, "*注：数据来源于公司销售系统，统计日期截至2022.01.01",
+	color=white, fontsize=11, va="center")
+
+plt.show()

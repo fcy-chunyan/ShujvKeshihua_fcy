@@ -1,0 +1,69 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.patches import FancyBboxPatch
+from scipy.interpolate import PchipInterpolator
+
+months = ['5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月', '1月', '2月', '3月']
+sales = np.array([160, 210, 300, 420, 510, 620, 790, 980, 3782, 3200, 2900])
+
+x = np.arange(len(months)) + 0.5
+ticks = np.arange(len(months) + 1)
+
+xx = np.linspace(x[0], x[-1], 800)
+yy = PchipInterpolator(x, sales)(xx)
+
+plt.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'DejaVu Sans']
+plt.rcParams['axes.unicode_minus'] = False
+
+fig, ax = plt.subplots(figsize=(12, 8.6), dpi=100)
+fig.patch.set_facecolor('#1d2249')
+ax.set_facecolor('#1d2249')
+fig.subplots_adjust(left=0.12, right=0.96, top=0.77, bottom=0.25)
+
+fig.text(0.055, 0.93, '化妆品品类月度销量走势', color='white', fontsize=31,
+         fontweight='bold', ha='left', va='top')
+fig.text(0.055, 0.86, '2022年销量迅速增加，1月最高，销量达到3782',
+         color='white', fontsize=22, ha='left', va='top')
+
+ax.plot(xx, yy, color='#ff7040', linewidth=2.2)
+ax.set_xlim(0, 11)
+ax.set_ylim(0, 4300)
+
+ax.set_xticks(ticks)
+ax.set_xticklabels([])
+ax.tick_params(axis='x', colors='white', length=5, width=1.2,
+               direction='out', pad=0)
+
+ax.set_yticks([0, 1000, 2000, 3000, 4000])
+ax.set_yticklabels(['0', '1,000', '2,000', '3,000', '4,000'],
+                   color='#ff6841', fontsize=13)
+ax.tick_params(axis='y', colors='#ff6841', length=0, pad=10)
+
+for spine in ('top', 'right', 'left'):
+    ax.spines[spine].set_visible(False)
+ax.spines['bottom'].set_color('white')
+ax.spines['bottom'].set_linewidth(1.5)
+
+ax.vlines(8.5, 0, 3782, color='#ff7040', linewidth=1.5, linestyles=(0, (7, 6)))
+ax.text(8.5, 3990, '3782', color='white', fontsize=14, ha='center')
+
+trans = ax.get_xaxis_transform()
+
+for month_index, month in zip(x, months):
+    ax.text(month_index, -0.055, month, transform=trans,
+            ha='center', va='top', color='white', fontsize=14)
+
+for start, end, label, face in (
+        (0.0, 8.0, '2021', "#25cae7"),
+        (8.25, 11.0, '2022', '#ffc22e')):
+    ax.add_patch(FancyBboxPatch(
+        (start, -0.26), end - start, 0.09, transform=trans, clip_on=False,
+        boxstyle='round,pad=0.0,rounding_size=0.02',
+        facecolor=face, edgecolor='none', alpha=1.0))
+    ax.text((start + end) / 2, -0.215, label, transform=trans,
+            ha='center', va='center', color='white', fontsize=13)
+
+fig.text(0.045, 0.055, '*注：数据来源于公司销售系统，统计日期截至2022.03.31',
+         color='white', fontsize=13, ha='left')
+
+plt.show()

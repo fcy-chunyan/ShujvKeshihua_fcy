@@ -1,0 +1,43 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.patches import Wedge
+
+plt.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'Noto Sans CJK SC', 'DejaVu Sans']
+plt.rcParams['axes.unicode_minus'] = False
+
+departments = ['销售部', '采购部', '工程部', '财务部', '行政部', '人力部']
+people = np.array([451, 326, 293, 238, 226, 130])
+colors = ['#ed4d6d', '#f7c544', '#11a8ad', '#238fca', '#1679bd', '#7539a5']
+
+fig, ax = plt.subplots(figsize=(8.70, 6.19), dpi=100)
+fig.patch.set_facecolor('#1b2048')
+ax.set_facecolor('#1b2048')
+ax.set_xlim(0, 870)
+ax.set_ylim(0, 619)
+ax.axis('off')
+
+ax.text(58, 582, '2022年上半年各部门人数', color='white', fontsize=30,
+	fontweight='bold', va='top')
+ax.text(58, 535, '公司总人数1664，销售部门人数最多451，占比27%',
+	color='white', fontsize=21, va='top')
+
+center = (392, 263)
+outer_radius = 195
+bar_width = 13
+bar_gap = 5
+start = 90
+full_value = 832
+full_arc = 360
+for index, (department, value, color) in enumerate(zip(departments, people, colors)):
+    radius = outer_radius - index * (bar_width + bar_gap)
+    arc = full_arc * value / full_value
+    ax.add_patch(Wedge(center, radius, start - arc, start,
+		       width=bar_width, facecolor=color, edgecolor='none'))
+    ax.text(300, 453 - index * 17, f'{department} {value}', color='white',
+	    fontsize=11, ha='left', va='center')
+
+ax.text(43, 28, '*注：数据来源于公司人力资源系统，统计日期截止2022.06.30',
+	color='white', fontsize=12, va='bottom')
+
+plt.tight_layout(pad=0)
+plt.show()

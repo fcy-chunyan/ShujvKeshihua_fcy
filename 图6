@@ -1,0 +1,52 @@
+import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle, FancyBboxPatch
+
+plt.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'Arial Unicode MS']
+plt.rcParams['axes.unicode_minus'] = False
+
+regions = ['华南', '华北', '东北', '西北', '华东']
+values_2022 = [2238, 1531, 1426, 1321, 1215]
+values_2021 = [2066, 1436, 1531, 1265, 1003]
+
+fig, ax = plt.subplots(figsize=(8.67, 5.91), dpi=100)
+fig.patch.set_facecolor('#1c2149')
+ax.set_facecolor('#1c2149')
+ax.set_xlim(-2700, 2700)
+ax.set_ylim(-0.85, 5.2)
+ax.axis('off')
+
+ax.text(-2380, 4.65, '2022年上半年各区域对比去年销量', color='white',
+	fontsize=25, fontweight='bold', va='center')
+ax.text(-2380, 4.25, '2022年整体销量高于2021年，只有东北区域较2021有所下降',
+	color='white', fontsize=14, va='center')
+ax.text(-700, 3.55, '2022', color='#087cc5', fontsize=14, ha='center')
+ax.text(540, 3.55, '2021', color='#ed4d70', fontsize=14, ha='center')
+
+bar_height = 0.30
+ys = [3.10, 2.30, 1.50, 0.70, -0.10]
+for region, v22, v21, y in zip(regions, values_2022, values_2021, ys):
+    ax.add_patch(Rectangle((-v22, y - bar_height / 2), v22, bar_height,
+			   facecolor='#087cc5', edgecolor='none'))
+    ax.add_patch(Rectangle((0, y - bar_height / 2), v21, bar_height,
+			   facecolor='#ed4d70', edgecolor='none'))
+    ax.text(-v22 + 145, y, str(v22), color='white', fontsize=10,
+	    ha='left', va='center')
+    ax.text(v21 - 145, y, str(v21), color='white', fontsize=10,
+	    ha='right', va='center')
+
+    label_width = 760
+    label_height = bar_height
+    label_x = -label_width / 2
+    label_y = y - label_height / 2
+    label_patch = FancyBboxPatch((label_x, label_y), label_width, label_height,
+				boxstyle='square,pad=0.0', facecolor='#1c2149',
+				edgecolor='none', mutation_aspect=1.0,
+				transform=ax.transData)
+    ax.add_patch(label_patch)
+    ax.text(0, y, region, color='white', fontsize=11, ha='center', va='center')
+
+ax.text(-2380, -0.62, '*注：数据来源于公司销售系统，统计日期截至2022.06.30',
+	color='white', fontsize=10, va='center')
+
+plt.tight_layout(pad=0)
+plt.show()

@@ -1,0 +1,50 @@
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.font_manager import FontProperties
+
+months = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月"]
+values = np.array([53.6, 49.8, 52.7, 70.8, 60.9, 49.6, 58.6, 70.4])
+
+plt.rcParams["axes.unicode_minus"] = False
+font = FontProperties(fname=r"C:\Windows\Fonts\msyh.ttc")
+bg = "#1d234b"
+
+fig, ax = plt.subplots(figsize=(12, 8), dpi=100)
+fig.patch.set_facecolor(bg)
+ax.set_facecolor(bg)
+x = np.arange(len(months))
+
+for xi, value in zip(x, values):
+    ax.vlines(xi, 0, value, color="#ff4164", linewidth=1.8)
+    ax.plot(xi, value, marker="D", markersize=12, markerfacecolor=bg,
+            markeredgecolor="#ff4164", markeredgewidth=2.2)
+    ax.text(xi, value + 3, f"{value:.2f}%", ha="center", color="white",
+            fontsize=12, fontproperties=font)
+
+ax.set_xlim(-0.5, 7.5)
+ax.set_ylim(0, 120) 
+ax.set_xticks(x)
+ax.set_xticklabels([])
+ax.set_yticks([])
+ax.tick_params(axis="x", length=0, pad=10)
+
+for spine in ax.spines.values():
+    spine.set_visible(False)
+ax.spines["bottom"].set_visible(True)
+ax.spines["bottom"].set_position(("data", 0))
+ax.spines["bottom"].set_color("white")
+ax.spines["bottom"].set_linewidth(1.2)
+
+for xi, month in zip(x, months):
+    ax.text(xi, -3, month, ha="center", va="top", color="white",
+            fontsize=12, fontproperties=font)
+
+ax.text(-0.28, 110, "2022年1-8月公司计划完成率", color="white", fontsize=33,
+        fontweight="bold", fontproperties=font, ha="left", va="top")
+ax.text(-0.28, 99, "公司整体完成率55%，4月和8月超过70%，2月和6月较低未过半",
+        color="white", fontsize=20, fontproperties=font, ha="left", va="top")
+ax.text(-0.58, -9, "*注：数据来源于公司销售系统，统计日期截至2022.08.31",
+        color="white", fontsize=12, fontproperties=font, ha="left", va="top")
+
+plt.tight_layout(pad=0.8)
+plt.show()
