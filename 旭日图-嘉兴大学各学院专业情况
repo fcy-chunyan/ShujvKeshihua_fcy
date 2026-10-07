@@ -25,7 +25,7 @@ data = {
 
 print("嘉兴大学15个学院本科专业分布：")
 for college, majors in data.items():
-    print(f"\n📚 {college}（{len(majors)}个专业）")
+    print(f"\n {college}（{len(majors)}个专业）")
     for i, major in enumerate(majors, 1):
         prefix = "└──" if i == len(majors) else "├──"
         print(f"   {prefix} {major}")
