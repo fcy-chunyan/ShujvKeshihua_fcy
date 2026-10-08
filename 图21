@@ -1,0 +1,119 @@
+import math
+import os
+import matplotlib.pyplot as plt
+from matplotlib.font_manager import FontProperties
+from matplotlib.patches import Wedge
+
+font_candidates = [
+    r"C:\Windows\Fonts\msyh.ttc",    
+    r"C:\Windows\Fonts\simhei.ttf",  
+    r"C:\Windows\Fonts\simsun.ttc",  
+]
+font_path = next(
+    (path for path in font_candidates if os.path.exists(path)),
+    None,
+)
+
+if font_path:
+    chinese_font = FontProperties(fname=font_path)
+else:
+    chinese_font = FontProperties(
+        family=["Microsoft YaHei", "SimHei", "SimSun", "sans-serif"]
+    )
+
+plt.rcParams["axes.unicode_minus"] = False
+
+fig, ax = plt.subplots(figsize=(8.67, 5.91), dpi=100)
+background = "#1b2046"
+fig.patch.set_facecolor(background)
+ax.set_facecolor(background)
+ax.set_xlim(0, 867)
+ax.set_ylim(0, 591)
+ax.set_aspect("equal")
+ax.axis("off")
+
+ax.text(
+    49, 555, "2021年各部门人数分布",
+    color="white", fontsize=25, fontweight="bold",
+    ha="left", va="center", fontproperties=chinese_font,
+)
+ax.text(
+    49, 510, "公司总人数1664，销售部人数最多451，占比29.2%",
+    color="white", fontsize=17,
+    ha="left", va="center", fontproperties=chinese_font,
+)
+
+center = (422, 251)
+radius = 173
+slices = [
+    (29.2, "#e94765"),
+    (22.7, "#f6c24f"),
+    (17.5, "#10a4aa"),
+    (13.6, "#36a5d8"),
+    (10.3, "#0878bd"),
+    (5.0, "#8133a0"),
+]
+slices.sort(key=lambda item: item[0], reverse=True)
+total_share = sum(share for share, _ in slices)
+
+angle = 90
+outer_points = {}
+min_radius = radius * 0.32
+radius_step = (radius - min_radius) / max(len(slices) - 1, 1)
+for index, (share, color) in enumerate(slices):
+    next_angle = angle - share / total_share * 360
+    slice_radius = radius - index * radius_step
+    ax.add_patch(
+        Wedge(
+            center, slice_radius, next_angle, angle,
+            facecolor=color, edgecolor="none",
+        )
+    )
+    midpoint = (angle + next_angle) / 2
+    outer_points[color] = (
+        center[0] + slice_radius * math.cos(math.radians(midpoint)),
+        center[1] + slice_radius * math.sin(math.radians(midpoint)),
+    )
+    angle = next_angle
+
+leaders = [
+    ([(681, 406), (785, 406)], "#e94765", "销售部"),
+    ([(622, 93), (726, 93)], "#f6c24f", "采购部"),
+    ([(264, 85), (161, 85)], "#10a4aa", "工程部"),
+    ([(243, 227), (140, 227)], "#36a5d8", "财务部"),
+    ([(330, 367), (186, 367)], "#0878bd", "行政部"),
+    ([(389, 402), (285, 402)], "#8133a0", "人力部"),
+]
+
+for bends, color, department in leaders:
+    outer_point = outer_points[color]
+    direction = (outer_point[0] - center[0], outer_point[1] - center[1])
+    distance = math.hypot(*direction)
+    dot = (
+        outer_point[0] + direction[0] / distance * 12,
+        outer_point[1] + direction[1] / distance * 12,
+    )
+    points = [dot, *bends]
+    ax.plot(
+        [point[0] for point in points],
+        [point[1] for point in points],
+        color=color, lw=1.5,
+    )
+    ax.scatter(dot[0], dot[1], s=22, color=color, zorder=5)
+    label_x = (bends[-2][0] + bends[-1][0]) / 2
+    end_y = bends[-1][1]
+    ax.text(
+        label_x, end_y + 6, department,
+        color="white", fontsize=14,
+        ha="center", va="bottom",
+        fontproperties=chinese_font,
+    )
+
+ax.text(
+    41, 31, "*注：数据来源于公司人力资源系统，统计日期截至2022.01.01",
+    color="white", fontsize=12,
+    ha="left", va="center", fontproperties=chinese_font,
+)
+
+plt.tight_layout(pad=0)
+plt.show()
