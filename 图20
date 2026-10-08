@@ -1,0 +1,91 @@
+import matplotlib.pyplot as plt
+from matplotlib.patches import Wedge
+
+plt.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'Noto Sans CJK SC', 'WenQuanYi Micro Hei', 'DejaVu Sans']
+plt.rcParams['axes.unicode_minus'] = False
+
+fig, ax = plt.subplots(figsize=(8.72, 6.17), dpi=100)
+fig.patch.set_facecolor('#1b2046')
+ax.set_facecolor('#1b2046')
+ax.set_xlim(0, 872)
+ax.set_ylim(617, 0)
+ax.set_aspect('equal')
+ax.axis('off')
+
+white = '#f4f4f7'
+gray = '#9aa2bc'
+purple = '#5a2ddb'
+blue = "#546fe4"
+cyan = '#54c9d8'
+yellow = '#f0c148'
+
+ax.text(55, 48, '2022年上半年各年龄段人数分布',
+        color=white, fontsize=25, fontweight='bold', va='baseline')
+ax.text(55, 89, '公司平均年龄32.5，20-30员工比例最高占比37.5%',
+        color=white, fontsize=19)
+
+cx, cy, outer_r = 434, 369, 151
+max_rings = 5
+band_width = 56 / max_rings
+groups = [
+    (12.5, yellow),
+    (20.8, cyan),
+    (29.2, blue),
+    (37.5, purple),
+]
+ring_counts = {
+    color: max(1, round(share / max(share for share, _ in groups) * max_rings))
+    for share, color in groups
+}
+
+for band in range(max_rings):
+    r = outer_r - band * band_width
+    start = 0
+    for share, color in groups:
+        end = start + share
+        theta1 = -90 - end * 3.6
+        theta2 = -90 - start * 3.6
+        if band >= max_rings - ring_counts[color]:
+            ax.add_patch(
+                Wedge(
+                    center=(cx, cy),
+                    r=r,
+                    theta1=theta1,
+                    theta2=theta2,
+                    width=band_width,
+                    facecolor=color,
+                    edgecolor='#1b2046',
+                    linewidth=0.35
+                )
+            )
+        start = end
+
+ax.plot([593, 678, 688], [304, 193, 193], color=gray, lw=1.8)
+ax.plot([638, 669, 800], [255, 217, 217], color=purple, lw=1.8)
+ax.scatter([638], [255], s=22, color=purple, zorder=5)
+ax.text(694, 187, '[20,30)', color=white, fontsize=14)
+ax.text(697, 210, '37.5%', color=purple, fontsize=14, fontweight='bold')
+
+ax.plot([554, 582, 723], [526, 566, 566], color=blue, lw=1.8)
+ax.plot([554, 630], [540, 534], color=gray, lw=1.8)
+ax.scatter([554], [526], s=25, color=blue, zorder=5)
+ax.text(636, 529, '[30,40)', color=white, fontsize=14)
+ax.text(641, 552, '29.2%', color=blue, fontsize=14, fontweight='bold')
+
+ax.plot([257, 228, 83], [335, 374, 374], color=cyan, lw=1.8)
+ax.plot([257, 199, 264], [335, 341, 347], color=gray, lw=1.8)
+ax.scatter([257], [335], s=25, color=cyan, zorder=5)
+ax.text(141, 337, '[40,50)', color=white, fontsize=14)
+ax.text(144, 358, '20.8%', color=cyan, fontsize=14, fontweight='bold')
+
+ax.plot([334, 310, 172], [221, 186, 186], color=yellow, lw=1.8)
+ax.plot([334, 283, 368], [221, 154, 211], color=gray, lw=1.8)
+ax.scatter([334], [221], s=25, color=yellow, zorder=5)
+ax.text(232, 150, '>=50', color=white, fontsize=14)
+ax.text(232, 171, '12.5%', color=yellow, fontsize=14, fontweight='bold')
+
+ax.text(55, 588, '注：数据来源于公司人力资源系统，统计日期截至2022.06.30',
+        color=white, fontsize=12)
+
+plt.tight_layout(pad=0)
+plt.show()
