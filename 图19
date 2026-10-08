@@ -1,0 +1,57 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+plt.rcParams['font.family'] = 'Microsoft YaHei'
+plt.rcParams['axes.unicode_minus'] = False
+
+values = [29.2, 22.7, 17.5, 13.6, 10.3, 6.7]
+departments = ['销售部', '采购部', '工程部', '财务部', '行政部', '人力部']
+colors = ["#EA5676", '#F2BF3B', '#28B7B5', "#0878D4", "#4BA9D5", "#7D1AAB"]
+
+fig = plt.figure(figsize=(16, 9), facecolor='#1b2a4c')
+ax = fig.add_axes([0.12, 0.12, 0.72, 0.62], facecolor='#1b2a4c')
+
+wedges, _ = ax.pie(
+    values,
+    colors=colors,
+    startangle=90,
+    counterclock=False,
+    radius=1.0,
+    wedgeprops=dict(edgecolor='none', linewidth=0),
+)
+
+for i, w in enumerate(wedges):
+    angle = (w.theta1 + w.theta2) / 2
+    ang = np.deg2rad(angle)
+    cos_a = np.cos(ang)
+    sin_a = np.sin(ang)
+
+    x_dot = 0.62 * cos_a
+    y_dot = 0.62 * sin_a
+
+    x0, y0 = 0.82 * cos_a, 0.82 * sin_a
+
+    if cos_a >= 0:
+        x1, y1 = 1.20 * cos_a, 0.82 * sin_a
+        x2, y2 = x1 + 0.22, y1
+        label_x = x2 + 0.10
+        ha = 'left'
+    else:
+        x1, y1 = -1.20, 0.82 * sin_a
+        x2, y2 = x1 - 0.22, y1
+        label_x = x2 - 0.10
+        ha = 'right'
+
+    ax.plot([x0, x1, x2], [y0, y1, y2], color=colors[i], lw=1.8, alpha=1.0)
+    ax.plot(x_dot, y_dot, 'o', color=colors[i], ms=6, alpha=1.0)
+    ax.text(label_x, y2, departments[i], color=colors[i], fontsize=16, ha=ha, va='center', alpha=0.95)
+
+ax.set(aspect='equal')
+ax.set_axis_off()
+
+fig.text(0.12, 0.87, '2021年各部门人数分布', fontsize=35, color='white', weight='bold')
+fig.text(0.12, 0.78, '公司总人数1664，销售部人数最多451，占比29.2%', fontsize=20, color='white', alpha=0.9)
+
+fig.text(0.12, 0.15, '注：数据来源于公司人力资源系统，统计日期截至2022.01.01', fontsize=12, color='white', alpha=0.7)
+
+plt.show()
