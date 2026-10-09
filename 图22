@@ -1,0 +1,73 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.patches import Wedge
+
+plt.rcParams["font.sans-serif"] = ["Microsoft YaHei"]
+plt.rcParams["axes.unicode_minus"] = False
+
+fig = plt.figure(figsize=(8.67, 6.2), facecolor="#1b1d45")
+fig.text(0.5, 0.89, "2022年6月29公司整体运营指数良好",
+		 ha="center", va="center", color="white", fontsize=23,
+		 fontweight="bold")
+
+ax = fig.add_axes([0.281, 0.055, 0.475, 0.665])
+ax.set_facecolor("white")
+ax.set_aspect("equal")
+ax.set_xlim(-1.01, 1.01)
+ax.set_ylim(-1.01, 1.01)
+ax.set_xticks([])
+ax.set_yticks([])
+for spine in ax.spines.values():
+	spine.set_visible(False)
+
+def theta(value):
+	return np.deg2rad(225 - (value - 50) * 2.7)
+
+def segment(v0, v1, outer, inner, color, edge="#1b1d45", lw=1.5):
+	ax.add_patch(Wedge((0, 0), outer, 225-(v1-50)*2.7,
+					   225-(v0-50)*2.7, width=outer-inner,
+					   facecolor=color, edgecolor=edge, linewidth=lw, zorder=2))
+
+ax.add_patch(Wedge((0, 0), 0.99, 0, 360, width=0.09,
+					facecolor="#0878c9", edgecolor="#0878c9", linewidth=0))
+ax.add_patch(Wedge((0, 0), 0.90, 0, 360, width=0.21,
+					facecolor="#1b1d45", edgecolor="#1b1d45", linewidth=0))
+
+tick_gap = 0.25
+for start in range(50, 150, 10):
+	end = start + 10
+	midpoint = (start + end) / 2
+	color = "#078b8d" if midpoint < 80 else "#ffc247" if midpoint < 120 else "#f4435c"
+	segment(start + tick_gap / 2, end - tick_gap / 2, 0.89, 0.79,
+			color, edge=color, lw=0)
+
+for value in range(50, 151, 10):
+	t = theta(value)
+	ax.plot([0.79*np.cos(t), 0.87*np.cos(t)], [0.79*np.sin(t), 0.87*np.sin(t)],
+			color="#1b1d45", linewidth=1.5, zorder=4)
+
+ax.add_patch(Wedge((0, 0), 0.99, 0, 360, width=0.09,
+				facecolor="#0878c9", edgecolor="#0878c9", linewidth=0, zorder=6))
+ax.add_patch(Wedge((0, 0), 1.0, 0, 360, width=0.01,
+				facecolor="#1b1d45", edgecolor="#1b1d45", linewidth=0, zorder=6))
+
+gap_half_angle = tick_gap * 2.7 / 2
+for value in range(60, 150, 10):
+	angle = 225 - (value - 50) * 2.7
+	ax.add_patch(Wedge((0, 0), 1.0, angle - gap_half_angle,
+					angle + gap_half_angle, width=0.21,
+					facecolor="#1b1d45", edgecolor="#1b1d45",
+					linewidth=0, zorder=8))
+
+for value in range(50, 151, 10):
+	t = theta(value)
+
+ax.add_patch(plt.Circle((0, 0), 0.69, facecolor="white", edgecolor="white", zorder=6))
+ax.plot([0, -0.68], [0, 0.32], color="#eeeeee", linewidth=1.8, zorder=7)
+
+for value in range(50, 151, 10):
+	t = theta(value)
+	ax.text(0.75*np.cos(t), 0.75*np.sin(t), str(value),
+			color="white", fontsize=9, ha="center", va="center", zorder=8)
+
+plt.show()
