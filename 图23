@@ -1,0 +1,55 @@
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.patches import Patch
+from matplotlib.lines import Line2D
+
+plt.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'Noto Sans CJK SC', 'Arial Unicode MS', 'DejaVu Sans']
+plt.rcParams['axes.unicode_minus'] = False
+
+years = ['2017', '2018', '2019', '2020', '2021', '2022']
+sales = [1603, 2106, 2406, 3265, 3721, 3921]
+growth = [27, 31, 14, 36, 14, 5]
+x = np.arange(len(years))
+background, bar_color, line_color = '#1b2148', '#0876bd', '#f34d70'
+
+fig, ax = plt.subplots(figsize=(8.65, 5.9), dpi=100)
+fig.patch.set_facecolor(background)
+ax.set_facecolor(background)
+
+bars = ax.bar(x, sales, width=0.26, color=bar_color, zorder=2)
+for rect, number in zip(bars, sales):
+    ax.text(rect.get_x() + rect.get_width()/2, number + 150, str(number),
+            color='white', ha='center', va='bottom', fontsize=11)
+
+ax2 = ax.twinx()
+ax2.set_facecolor('none')
+ax2.plot(x, growth, color=line_color, marker='o', markersize=6, linewidth=2.4, zorder=3)
+for xi, rate in zip(x, growth):
+    ax2.text(xi, rate + 0.2, f'{rate}%', color='white', ha='center', va='bottom', fontsize=11)
+
+ax.set_xlim(-0.65, 5.65)
+ax.set_ylim(0, 6200)
+ax2.set_ylim(-159, 64)
+ax.set_xticks(x, years)
+ax.tick_params(axis='x', colors='white', labelsize=11, length=0, pad=10)
+for axis in (ax, ax2):
+    axis.set_yticks([])
+    for spine in axis.spines.values():
+        spine.set_visible(False)
+
+fig.text(0.062, 0.948, '近六年销售量及增长率', color='white', fontsize=24,
+         fontweight='bold', ha='left', va='top')
+fig.text(0.062, 0.872, '平台销量近6年持续增长，但近两年增长率有所放缓',
+         color='white', fontsize=15, ha='left', va='top')
+
+legend = fig.legend(handles=[Patch(facecolor=bar_color, label='销量'),
+                             Line2D([0], [0], color=line_color, marker='o', linewidth=2.4, label='同比')],
+                    loc='upper right', bbox_to_anchor=(0.94, 0.76), ncol=2,
+                    frameon=False, fontsize=12, handlelength=2.2,
+                    columnspacing=1.0, handletextpad=0.4)
+for label in legend.get_texts():
+    label.set_color('white')
+
+fig.text(0.06, 0.035, '注：数据来源于公司销售系统', color='white', fontsize=11, ha='left')
+plt.subplots_adjust(left=0.06, right=0.95, bottom=0.14, top=0.78)
+plt.show()
