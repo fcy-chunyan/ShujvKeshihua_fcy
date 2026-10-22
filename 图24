@@ -1,0 +1,52 @@
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib import font_manager
+
+# Choose an installed CJK font when available.
+font_names = {font.name for font in font_manager.fontManager.ttflist}
+for name in ("Microsoft YaHei", "SimHei", "Noto Sans CJK SC", "Arial Unicode MS"):
+	if name in font_names:
+		plt.rcParams["font.sans-serif"] = [name]
+		break
+plt.rcParams["axes.unicode_minus"] = False
+
+labels = ["口红", "面膜", "隔离", "防晒", "精华", "面霜"]
+actual = [653, 523, 648, 856, 714, 785]
+target = [700, 500, 600, 900, 600, 600]
+x = np.arange(len(labels))
+
+fig, ax = plt.subplots(figsize=(8.76, 5.89), dpi=100)
+bg = "#1b2047"
+fig.patch.set_facecolor(bg)
+ax.set_facecolor(bg)
+
+ax.bar(x, target, width=0.24, facecolor="none", edgecolor="#9295a8",
+	   linewidth=1.5, label="目标销量", zorder=2)
+ax.bar(x, actual, width=0.17, color="#0876bd", label="实际销量", zorder=3)
+
+ax.set_xlim(-0.5, len(labels) - 0.5)
+ax.set_ylim(0, 1000)
+ax.set_xticks(x)
+ax.set_xticklabels(labels, color="white", fontsize=13)
+ax.set_yticks([])
+ax.tick_params(axis="x", length=0, pad=10)
+for side in ax.spines.values():
+	side.set_visible(False)
+ax.axhline(0, color="#263663", linewidth=1.2, clip_on=False, zorder=1)
+
+for xpos, value in zip(x, actual):
+	ax.text(xpos, value + 80, str(value), color="white", ha="center",
+			va="bottom", fontsize=11)
+
+fig.text(0.073, 0.897, "2022年上半年各商品销量完成情况", color="white",
+		 fontsize=25, fontweight="bold", ha="left")
+fig.text(0.073, 0.839, "防晒整体销量最好，达到856，面霜远超目标，超额完成30%",
+		 color="white", fontsize=16, ha="left")
+ax.legend(loc="upper left", bbox_to_anchor=(0.025, 1), ncol=2,
+		  frameon=False, labelcolor="#d8d9e3", fontsize=11,
+		  handlelength=0.7, handleheight=0.7, columnspacing=1.0)
+fig.text(0.073, 0.055, "*注：数据来源于公司销售系统，统计日期截至2022.06.30",
+		 color="white", fontsize=11, ha="left")
+
+plt.subplots_adjust(left=0.075, right=0.925, top=0.77, bottom=0.19)
+plt.show()
