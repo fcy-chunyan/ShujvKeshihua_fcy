@@ -1,0 +1,60 @@
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib import font_manager
+
+available_fonts = {item.name for item in font_manager.fontManager.ttflist}
+for candidate in ("Microsoft YaHei", "SimHei", "Noto Sans CJK SC", "Arial Unicode MS"):
+	if candidate in available_fonts:
+		plt.rcParams["font.sans-serif"] = [candidate]
+		break
+plt.rcParams["axes.unicode_minus"] = False
+
+categories = ["口红", "面膜", "隔离", "防晒", "精华", "面霜"]
+pass_values = np.array([600, 600, 600, 600, 600, 600])
+good_values = np.array([200, 200, 200, 200, 200, 200])
+excellent_values = np.array([200, 200, 200, 200, 200, 200])
+actual_values = [653, 523, 648, 856, 714, 785]
+target_values = [700, 500, 600, 900, 600, 600]
+
+fig, ax = plt.subplots(figsize=(10, 6.8), facecolor="#1b2047")
+ax.set_facecolor("#1b2047")
+x = np.arange(len(categories))
+bar_width = 0.29
+
+ax.bar(x, pass_values, bar_width, color="#8db6dc", label="及格", zorder=2)
+ax.bar(x, good_values, bar_width, bottom=pass_values, color="#078bb9", label="良好", zorder=2)
+ax.bar(x, excellent_values, bar_width, bottom=pass_values + good_values,
+	   color="#0872bd", label="优秀", zorder=2)
+ax.bar(x, actual_values, bar_width * 0.58, color="#1761ff", label="实际", zorder=3)
+for i, target in enumerate(target_values):
+	ax.hlines(target, x[i] - bar_width / 2 + 0.05, x[i] + bar_width / 2 - 0.05,
+			  color="#ffd21c", linewidth=3.2,
+			  label="目标" if i == 0 else "_nolegend_", zorder=4)
+
+fig.text(0.06, 0.925, "2022年上半年各商品销量完成情况", color="white",
+		 fontsize=24, fontweight="bold", ha="left")
+fig.text(0.06, 0.875, "防晒整体销量最好，达到856，面霜远超目标，超额完成30%",
+		 color="white", fontsize=16, ha="left")
+
+ax.set_ylim(0, 1200)
+ax.set_yticks(np.arange(0, 1201, 200))
+ax.set_xticks(x)
+ax.set_xticklabels(categories)
+ax.tick_params(axis="x", colors="white", labelsize=12, length=0, pad=9)
+ax.tick_params(axis="y", colors="white", labelsize=10, length=0, pad=8)
+ax.spines["bottom"].set_color("#555a75")
+ax.spines["bottom"].set_linewidth(1.2)
+for spine in ("left", "top", "right"):
+	ax.spines[spine].set_visible(False)
+handles, labels = ax.get_legend_handles_labels()
+legend_order = ["及格", "良好", "优秀", "实际", "目标"]
+ordered_handles = [handles[labels.index(label)] for label in legend_order]
+ax.legend(ordered_handles, legend_order,
+		  loc="upper left", bbox_to_anchor=(0.04, 1.04), ncol=5,
+		  frameon=False, fontsize=11, labelcolor="white",
+		  handlelength=0.7, columnspacing=1.0)
+fig.text(0.06, 0.07, "*注：数据来源于公司销售系统，统计日期截至2022.06.30",
+		 color="white", fontsize=11, ha="left")
+
+fig.subplots_adjust(left=0.13, right=0.97, bottom=0.22, top=0.69)
+plt.show()
