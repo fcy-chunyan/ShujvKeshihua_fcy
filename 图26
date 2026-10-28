@@ -1,0 +1,69 @@
+import matplotlib.pyplot as plt
+
+regions = ["华北", "华南", "东北", "西北", "西南", "华东"]
+sales = [2354, 1902, 3524, 2698, 2896, 2563]
+growth = [12, 25, 16, 21, 18, 25]
+
+plt.rcParams["font.sans-serif"] = [
+    "Microsoft YaHei", "SimHei", "Noto Sans CJK SC", "Arial Unicode MS"
+]
+plt.rcParams["axes.unicode_minus"] = False
+
+fig, ax = plt.subplots(figsize=(10, 6.85), dpi=100)
+background = "#1b1f43"
+fig.patch.set_facecolor(background)
+ax.set_facecolor(background)
+ax.set_xlim(-0.5, 5.5)
+ax.set_ylim(-900, 5900)
+ax.axis("off")
+
+ax.text(
+    -0.38, 5680, "各区域上半年销量以同比",
+    color="white", fontsize=26, fontweight="bold",
+    ha="left", va="top"
+)
+ax.text(
+    -0.38, 5160, "东北区域销量持续保持第一，华东和华南同比去年增长最多",
+    color="white", fontsize=17, ha="left", va="top"
+)
+
+bubble_y = 4350
+bubble_sizes = [(14 + value * 0.88) ** 2 for value in growth]
+
+ax.scatter(
+    range(len(growth)), [bubble_y] * len(growth),
+    s=bubble_sizes, color="#0785d1",
+    edgecolors="none", zorder=3
+)
+
+for i, value in enumerate(growth):
+    ax.text(
+        i, bubble_y, f"{value}%",
+        color="white", fontsize=13,
+        ha="center", va="center", zorder=4
+    )
+
+bars = ax.bar(
+    range(len(regions)), sales,
+    width=0.32, color="#ed4966", zorder=2
+)
+for bar, value in zip(bars, sales):
+    ax.text(
+        bar.get_x() + bar.get_width() / 2,
+        value + 180, str(value),
+        color="white", fontsize=11,
+        ha="center", va="bottom"
+    )
+
+ax.plot([-0.5, 5.5], [0, 0], color="#555975", linewidth=1.1)
+for i, region in enumerate(regions):
+    ax.text(i, -260, region, color="white", fontsize=12, ha="center", va="top")
+
+ax.text(
+    -0.38, -640,
+    "*注：数据来源于公司销售系统，统计日期截至2022.06.30",
+    color="white", fontsize=10.5, ha="left", va="top"
+)
+
+plt.subplots_adjust(left=0.085, right=0.96, top=0.97, bottom=0.04)
+plt.show()
