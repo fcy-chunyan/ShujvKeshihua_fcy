@@ -1,0 +1,87 @@
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib import font_manager
+
+installed_fonts = {font.name for font in font_manager.fontManager.ttflist}
+for font_name in ("Microsoft YaHei", "SimHei", "Noto Sans CJK SC", "Arial Unicode MS"):
+	if font_name in installed_fonts:
+		plt.rcParams["font.family"] = "sans-serif"
+		plt.rcParams["font.sans-serif"] = [font_name, "DejaVu Sans"]
+		break
+else:
+	font_candidates = [r"C:\Windows\Fonts\msyh.ttc", r"C:\Windows\Fonts\simhei.ttf"]
+	for font_path in font_candidates:
+		if __import__("os").path.exists(font_path):
+			font_manager.fontManager.addfont(font_path)
+			font_prop = font_manager.FontProperties(fname=font_path)
+			plt.rcParams["font.sans-serif"] = [font_prop.get_name(), "DejaVu Sans"]
+			break
+
+plt.rcParams["axes.unicode_minus"] = False
+
+months = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"]
+data = [
+	[2354, 1902, 3524],   # Q1
+	[2698, 2896, 2563],   # Q2
+	[3156, 2896, 3621],   # Q3
+	[2635, 2963, 2789],   # Q4
+]
+# 按月展开
+values = [2354, 1902, 3524, 2698, 2896, 2563, 3156, 2896, 3621, 2635, 2963, 2789]
+# 每季度总和
+quarter_sums = [sum(data[0]), sum(data[1]), sum(data[2]), sum(data[3])]
+quarter_pos = [1, 4, 7, 10]
+
+colors = ["#2d3a7c"]*3 + ["#ff7f0e"]*3 + ["#8c564b"]*3 + ["#9467bd"]*3
+quarter_mist_colors = ["#5b688f", "#b86b4a", "#b39a59", "#7867a0"]
+
+plt.figure(figsize=(10,6), facecolor="#181c3a")
+ax = plt.gca()
+
+quarter_positions = np.array([0, 1, 2, 4, 5, 6, 8, 9, 10, 12, 13, 14], dtype=float)
+quarter_centers = np.array([1, 5, 9, 13], dtype=float)
+
+bars = plt.bar(quarter_positions, values, color=colors, width=0.36)
+
+for x_pos, v in zip(quarter_positions, values):
+	plt.text(x_pos, v+100, str(v), ha='center', va='bottom', color='white', fontsize=11)
+
+for i, (center, qsum) in enumerate(zip(quarter_centers, quarter_sums)):
+	quarter_bar_height = qsum * 0.82
+	plt.text(center, quarter_bar_height + 120, str(qsum), ha='center', va='bottom',
+			 color='white', fontsize=15, fontweight='bold', zorder=5)
+
+plt.title("", fontsize=22, color='white')
+plt.suptitle("", fontsize=14, color='white')
+fig = plt.gcf()
+fig.text(0.05, 0.96, "2021年各月化妆品销量走势",
+         ha='left', va='top', fontsize=24, color='white', weight='bold')
+fig.text(0.05, 0.90, "2021年第三季度销量最多9673，9月单月销量最大3621",
+         ha='left', va='top', fontsize=16, color='white')
+plt.figtext(0.01, 0.01, "*注：数据来源于公司销售系统，统计日期截至2021.12.31", fontsize=10, color='white', ha='left')
+
+ax.set_facecolor('#181c3a')
+for spine in ax.spines.values():
+	spine.set_visible(False)
+
+ax.set_xticks(quarter_positions)
+ax.set_xticklabels(months, color='white', fontsize=12)
+ax.set_xlim(-0.8, 14.8)
+ax.tick_params(axis='x', length=0, pad=10, colors='white')
+ax.tick_params(axis='y', left=False, labelleft=False)
+ax.set_ylim(0, 10000)
+ax.axhline(0, color='#7f8498', linewidth=1.8, zorder=1)
+
+# 各季度合计柱状图：略微缩短柱高，保留浅雾感效果
+ax.bar(
+	quarter_centers,
+	[qsum * 0.82 for qsum in quarter_sums],
+	width=2.9,
+	color=quarter_mist_colors,
+	alpha=0.32,
+	edgecolor='none',
+	zorder=1
+)
+
+plt.tight_layout(rect=[0,0.03,1,0.95])
+plt.show()
