@@ -1,0 +1,69 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
+
+plt.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'Noto Sans CJK SC', 'DejaVu Sans']
+plt.rcParams['axes.unicode_minus'] = False
+
+regions = ['华北', '华南', '东北', '西北', '西南', '华东']
+y2022 = np.array([2354, 1902, 3524, 2698, 2896, 2563])
+y2021 = np.array([2021, 1563, 3213, 2531, 2631, 2361])
+growth = np.array([16, 22, 10, 7, 10, 9])
+
+fig = plt.figure(figsize=(8.96, 6.16), dpi=100, facecolor='#0b1b53')
+ax = fig.add_axes([0.055, 0.16, 0.89, 0.65], facecolor='#0b1b53')
+ax.set_xlim(-0.72, 5.72)
+ax.set_ylim(0, 5800)
+ax.axis('off')
+
+ax.set_axisbelow(True)
+for y in np.arange(1000, 5801, 500):
+    ax.axhline(y, color='#31558f', linewidth=0.5, alpha=0.16, zorder=0)
+
+x = np.arange(6)
+bar_w = 0.20
+bar_gap = 0.055
+bar_offset = bar_w / 2 + bar_gap / 2
+ax.bar(x - bar_offset, y2022, width=bar_w, color='#0d82c5', zorder=3)
+ax.bar(x + bar_offset, y2021, width=bar_w, color="#ef3e5b", zorder=3)
+
+for i, (v22, v21) in enumerate(zip(y2022, y2021)):
+    ax.text(i - bar_offset, v22 + 165, str(v22), ha='center', va='bottom',
+            color='#d7deef', fontsize=10, zorder=6)
+    ax.text(i + bar_offset, v21 + 165, str(v21), ha='center', va='bottom',
+            color='#d7deef', fontsize=10, zorder=6)
+
+line_y = np.array([4560, 4750, 4350, 4220, 4400, 4300])
+ax.plot(x, line_y, color='#f1b900', linewidth=2.2,
+        marker='o', markersize=7, markerfacecolor='#f1b900',
+        markeredgecolor='#f1b900', zorder=5)
+for gx, gy, rate in zip(x, line_y, growth):
+    ax.text(gx, gy + 310, f'{rate}%', ha='center', va='bottom',
+            color='#f6d29f', fontsize=13, zorder=6)
+
+for i, region in enumerate(regions):
+    ax.text(i, -260, region, ha='center', va='center',
+            color='#dbe0f4', fontsize=16, zorder=6)
+
+ax.text(5 + bar_offset, 1400, '2022', ha='center', va='center', fontsize=10,
+        color='white', zorder=7)
+ax.add_patch(Rectangle((5 + bar_offset - 0.24, 1225), 0.48, 370,
+                       facecolor='#0e3279', edgecolor='#168dd0',
+                       linewidth=1.5, zorder=6))
+ax.text(5 + bar_offset, 820, '2021', ha='center', va='center', fontsize=10,
+        color='white', zorder=7)
+ax.add_patch(Rectangle((5 + bar_offset - 0.24, 645), 0.48, 370,
+                       facecolor="#0b2963", edgecolor='#eb2d46',
+                       linewidth=1.5, zorder=6))
+
+ax.axhline(0, color='#5f7188', linewidth=2.8, alpha=0.75, zorder=2)
+
+fig.text(0.055, 0.915, '上半年各月商品销量同比去年情况',
+         ha='left', va='top', fontsize=25, fontweight='bold', color='white')
+fig.text(0.055, 0.835, '2022年相比于2021年销量都有提升，半年整体提升17%',
+         ha='left', va='top', fontsize=19, color='#f0f3ff')
+
+fig.text(0.055, 0.055, '*注：数据来源于公司销售系统，统计日期截至2022.06.30',
+         ha='left', va='center', fontsize=13, color='#dce3fb')
+
+plt.show()
