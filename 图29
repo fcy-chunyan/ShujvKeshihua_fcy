@@ -1,0 +1,76 @@
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+from matplotlib.patches import FancyBboxPatch
+
+mpl.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'Noto Sans CJK SC', 'Arial Unicode MS', 'DejaVu Sans']
+mpl.rcParams['axes.unicode_minus'] = False
+
+regions = ['华南', '华北', '东北', '西北', '华东']
+values_2022 = [86, 74, 62, 51, 35]
+
+fig, ax = plt.subplots(figsize=(13.21, 7.54), dpi=100)
+fig.patch.set_facecolor('#09102f')
+ax.set_facecolor('#09102f')
+
+fig.text(0.065, 0.885, '2022年上半年产品销量目标达成率情况',
+         fontsize=29, fontweight='bold', color='white', va='center')
+fig.text(0.065, 0.805, '华南完成率最高达到86%，华东最低35%',
+         fontsize=18, color='white', va='center')
+
+ax.set_xlim(0, 100)
+ax.set_ylim(-0.75, 4.75)
+ax.set_axis_off()
+ax.invert_yaxis()
+
+bar_y = [0, 1, 2, 3, 4]
+track = '#46506e'
+bar = '#0067bb'
+bar_height = 0.46
+capsule_radius = bar_height / 2
+marker_lines = []
+
+for y, label, value in zip(bar_y, regions, values_2022):
+    track_patch = FancyBboxPatch(
+        (0, y - bar_height / 2), 100, bar_height,
+        boxstyle=f'round,pad=0,rounding_size={capsule_radius}',
+        facecolor=track, edgecolor='none', zorder=1
+    )
+    ax.add_patch(track_patch)
+
+    value_patch = FancyBboxPatch(
+        (0, y - bar_height / 2), value, bar_height,
+        boxstyle=f'round,pad=0,rounding_size={capsule_radius}',
+        facecolor=bar, edgecolor='none', zorder=2
+    )
+    ax.add_patch(value_patch)
+
+    ax.text(-2.5, y, label, ha='right', va='center',
+            fontsize=15, color='#a8b8ff')
+    ax.text(value - 4.0, y, f'{value}%', ha='right', va='center',
+            fontsize=15, color='#cfe7ff', zorder=5)
+
+    marker_line, = ax.plot([value], [y], linestyle='none', marker='o',
+                           markerfacecolor=bar, markeredgecolor='white',
+                           markeredgewidth=1.8, markersize=20, zorder=6)
+    marker_lines.append(marker_line)
+
+
+def resize_marker_diameter(event=None):
+    """滚珠直径与柱体高度保持一致。"""
+    y_pixel = ax.transData.transform([[0, 0], [0, bar_height]])[:, 1]
+    diameter_pixels = abs(y_pixel[1] - y_pixel[0])
+    diameter_points = diameter_pixels * 72 / fig.dpi
+    for marker_line in marker_lines:
+        marker_line.set_markersize(diameter_points)
+
+
+fig.canvas.mpl_connect('draw_event', resize_marker_diameter)
+fig.canvas.draw()
+resize_marker_diameter()
+
+fig.text(0.065, 0.055,
+         '*注：数据来源于公司销售系统，统计日期截至2022.06.30',
+         fontsize=14, color='#d7dcff', va='center')
+
+plt.subplots_adjust(left=0.14, right=0.78, top=0.72, bottom=0.14)
+plt.show()
