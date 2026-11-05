@@ -1,0 +1,87 @@
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+import numpy as np
+from matplotlib.patches import FancyBboxPatch
+
+mpl.rcParams["font.family"] = "Microsoft YaHei"
+mpl.rcParams["axes.unicode_minus"] = False
+
+regions = ["华南", "华北", "东北", "西北", "华东"]
+values_2022 = np.array([86, 74, 62, 51, 35])
+values_2021 = np.array([92, 69, 53, 39, 45])
+
+background_color = "#091a44"
+
+fig, ax = plt.subplots(figsize=(8.4, 6.25), dpi=100,
+                       facecolor=background_color)
+ax.set_facecolor(background_color)
+
+ax.set_xlim(-13, 102)
+ax.set_ylim(-1.05, 6.35)
+ax.set_axis_off()
+ax.invert_yaxis()
+
+fig.text(0.055, 0.9, "2022年上半年销量目标达成率同比去年情况",
+         ha="left", va="center", fontsize=23, fontweight="bold",
+         color="#ffffff")
+fig.text(0.055, 0.842,
+         "华南完成率最高达86%，华东最低35%，其中华南和华东不及2021年",
+         ha="left", va="center", fontsize=14, color="#ffffff")
+
+# 图例：两个标签横向分开，整体左端与标题保持一致
+legend_y = 0.755
+fig.text(0.055, legend_y, "●", ha="left", va="center",
+         fontsize=20, color="#087ac7")
+fig.text(0.080, legend_y, "2022年完成率", ha="left", va="center",
+         fontsize=11, color="#ffffff")
+
+fig.text(0.205, legend_y, "●", ha="left", va="center",
+         fontsize=20, color="#bfc5d5")
+fig.text(0.230, legend_y, "2021年完成率", ha="left", va="center",
+         fontsize=11, color="#ffffff")
+
+bar_y = np.array([0.2, 1.45, 2.70, 3.95, 5.20], dtype=float)
+bar_height = 0.30
+track_color = "#65708f"
+color_2022 = "#087ac7"
+color_2021 = "#bfc5d5"
+
+for i, (region, value_2022, value_2021) in enumerate(
+        zip(regions, values_2022, values_2021)):
+    y = bar_y[i]
+
+    track = FancyBboxPatch(
+        (0, y - bar_height / 2), 100, bar_height,
+        boxstyle="round,pad=0,rounding_size=0.15",
+        facecolor=track_color, edgecolor="none", zorder=1
+    )
+    ax.add_patch(track)
+
+    completed = FancyBboxPatch(
+        (0, y - bar_height / 2), value_2022, bar_height,
+        boxstyle="round,pad=0,rounding_size=0.15",
+        facecolor=color_2022, edgecolor="none", zorder=2
+    )
+    ax.add_patch(completed)
+
+    ax.text(-4, y, region, ha="right", va="center",
+            fontsize=13, color="#cbd2eb")
+    ax.text(value_2022, y - 0.43, f"{value_2022}%",
+            ha="center", va="bottom", fontsize=12,
+            color="#9bbaf0")
+
+    ax.scatter([value_2022], [y], s=190, c="#087ac7",
+               edgecolors="#ffffff", linewidths=1.8, zorder=4)
+    ax.scatter([value_2021], [y], s=190, c=color_2021,
+               edgecolors="#ffffff", linewidths=1.4, zorder=5)
+
+fig.text(0.055, 0.052,
+         "注：数据来源于公司销售系统，统计日期截至2022.06.30",
+         ha="left", va="center", fontsize=11, color="#cbd2eb")
+
+for side in ax.spines.values():
+    side.set_visible(False)
+fig.patch.set_facecolor(background_color)
+
+plt.subplots_adjust(left=0.13, right=0.96, top=0.80, bottom=0.11)
+plt.show()
