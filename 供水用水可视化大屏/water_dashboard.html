@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>全国供水用水态势监测大屏 2016—2024</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;background:#03060d;
+    font-family:"Microsoft YaHei","PingFang SC","Hiragino Sans GB",sans-serif;
+    -webkit-font-smoothing:antialiased}
+  #stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;
+    transform-origin:50% 50%;}
+  .screen{width:100%;height:100%;padding:16px 22px 12px;display:flex;flex-direction:column;
+    gap:12px;position:relative;color:#dff1ff;
+    background:
+      radial-gradient(1100px 560px at 50% -8%, rgba(0,132,196,.26), transparent 62%),
+      radial-gradient(900px 520px at 102% 108%, rgba(0,86,170,.20), transparent 60%),
+      radial-gradient(760px 460px at -6% 96%, rgba(0,150,180,.14), transparent 60%),
+      #03060d;}
+  .screen::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background-image:linear-gradient(rgba(0,229,255,.055) 1px, transparent 1px),
+                     linear-gradient(90deg, rgba(0,229,255,.055) 1px, transparent 1px);
+    background-size:60px 60px;
+    mask-image:radial-gradient(circle at 50% 40%, #000 30%, transparent 92%);
+    -webkit-mask-image:radial-gradient(circle at 50% 40%, #000 30%, transparent 92%);}
+
+  /* ---------------- 顶部标题栏 ---------------- */
+  header{position:relative;height:74px;flex:0 0 74px;display:flex;align-items:center;
+    justify-content:space-between;padding:0 6px;
+    border-bottom:1px solid rgba(0,229,255,.22);}
+  header::before{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;
+    background:linear-gradient(90deg,transparent,rgba(0,229,255,.85),transparent);
+    filter:blur(.4px)}
+  .h-left,.h-right{width:440px;display:flex;align-items:center;gap:10px;font-size:13px;
+    color:#79a8c9;letter-spacing:.5px}
+  .h-right{justify-content:flex-end}
+  .h-title{text-align:center;flex:1}
+  .h-title h1{font-size:33px;font-weight:800;letter-spacing:5px;
+    background:linear-gradient(180deg,#ffffff 25%,#63d9f7 70%,#0ea5c4 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    text-shadow:0 0 26px rgba(0,200,255,.32)}
+  .h-title p{margin-top:5px;font-size:12.5px;letter-spacing:3.5px;color:#5f92b3}
+  .pill{padding:5px 12px;border:1px solid rgba(0,229,255,.28);border-radius:20px;
+    background:rgba(0,140,190,.10);color:#7fd4ee;font-size:12.5px;letter-spacing:.6px}
+  .dot{width:7px;height:7px;border-radius:50%;background:#2BE0C8;box-shadow:0 0 9px #2BE0C8;
+    animation:pulse 1.6s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.65)}}
+
+  /* ---------------- 主体三栏 ---------------- */
+  .main{flex:1;min-height:0;display:grid;grid-template-columns:452px 1fr 470px;gap:14px}
+  .col{min-height:0;display:flex;flex-direction:column;gap:14px}
+
+  .panel{position:relative;min-height:0;display:flex;flex-direction:column;
+    padding:8px 12px 10px;
+    background:linear-gradient(180deg, rgba(11,42,70,.62), rgba(4,16,30,.55));
+    border:1px solid rgba(0,229,255,.16);border-radius:3px;
+    box-shadow:inset 0 0 34px rgba(0,120,190,.10), 0 6px 20px rgba(0,0,0,.35);}
+  .panel::before,.panel::after{content:"";position:absolute;width:13px;height:13px;
+    border:2px solid rgba(0,229,255,.75);pointer-events:none}
+  .panel::before{left:-1px;top:-1px;border-right:0;border-bottom:0}
+  .panel::after{right:-1px;bottom:-1px;border-left:0;border-top:0}
+  .p-head{flex:0 0 30px;display:flex;align-items:center;gap:9px;padding-left:2px}
+  .p-head .bar{width:4px;height:14px;border-radius:2px;
+    background:linear-gradient(180deg,#00E5FF,#0077b6);box-shadow:0 0 10px rgba(0,229,255,.75)}
+  .p-head h2{font-size:15.5px;font-weight:700;letter-spacing:1.6px;color:#e6f7ff}
+  .p-head .en{font-size:10.5px;color:#4d7c9c;letter-spacing:1.4px;text-transform:uppercase}
+  .p-body{position:relative;flex:1;min-height:0}
+  .chart{position:absolute;inset:0}
+
+  /* ---------------- KPI 卡片 ---------------- */
+  .kpis{flex:0 0 104px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .kpi{position:relative;padding:12px 14px;display:flex;flex-direction:column;justify-content:center;
+    gap:5px;border:1px solid rgba(0,229,255,.18);border-radius:3px;overflow:hidden;
+    background:linear-gradient(150deg, rgba(0,120,180,.22), rgba(6,22,40,.55));}
+  .kpi::after{content:"";position:absolute;right:-30px;top:-30px;width:90px;height:90px;
+    border-radius:50%;background:radial-gradient(circle,rgba(0,229,255,.22),transparent 70%)}
+  .kpi .k-label{font-size:12.5px;color:#7fb0cd;letter-spacing:.8px}
+  .kpi .k-value{font-family:"DIN Alternate","Bahnschrift","Impact",sans-serif;
+    font-size:32px;font-weight:700;line-height:1.05;color:#ffffff;
+    text-shadow:0 0 20px rgba(0,220,255,.45)}
+  .kpi .k-value small{font-size:12px;font-weight:400;color:#6ea8c6;margin-left:5px;
+    text-shadow:none;letter-spacing:.5px}
+  .kpi .k-delta{font-size:11.5px;letter-spacing:.4px}
+  .up{color:#FFC64B}.down{color:#2BE0C8}
+
+  footer{flex:0 0 24px;display:flex;align-items:center;justify-content:center;gap:18px;
+    font-size:11.5px;color:#4d7c9c;letter-spacing:.5px;border-top:1px solid rgba(0,229,255,.10)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="screen">
+    <header>
+      <div class="h-left">
+        <span class="dot"></span>
+        <span class="pill">全国 · 年度口径</span>
+        <span class="pill">2016—2024</span>
+      </div>
+      <div class="h-title">
+        <h1>全国供水用水态势监测大屏</h1>
+        <p>WATER SUPPLY &amp; CONSUMPTION ANALYTICS · 数据来源：国家统计局</p>
+      </div>
+      <div class="h-right">
+        <span id="clock" class="pill">--:--:--</span>
+      </div>
+    </header>
+
+    <div class="main">
+      <!-- 左栏 -->
+      <div class="col">
+        <section class="panel" style="flex:1">
+          <div class="p-head"><span class="bar"></span><h2>供水结构演变</h2><span class="en">Supply Mix</span></div>
+          <div class="p-body"><div id="c-stack" class="chart"></div></div>
+        </section>
+        <section class="panel" style="flex:1">
+          <div class="p-head"><span class="bar"></span><h2>用水结构 · 2024</h2><span class="en">Use Mix</span></div>
+          <div class="p-body"><div id="c-pie" class="chart"></div></div>
+        </section>
+      </div>
+
+      <!-- 中栏 -->
+      <div class="col">
+        <div class="kpis" id="kpis"></div>
+        <section class="panel" style="flex:1.12">
+          <div class="p-head"><span class="bar"></span><h2>供水总量与同比增速</h2><span class="en">Total Supply &amp; YoY</span></div>
+          <div class="p-body"><div id="c-main" class="chart"></div></div>
+        </section>
+        <section class="panel" style="flex:1">
+          <div class="p-head"><span class="bar"></span><h2>四类用水量趋势</h2><span class="en">Use Trend</span></div>
+          <div class="p-body"><div id="c-trend" class="chart"></div></div>
+        </section>
+      </div>
+
+      <!-- 右栏 -->
+      <div class="col">
+        <section class="panel" style="flex:1">
+          <div class="p-head"><span class="bar"></span><h2>结构占比变化</h2><span class="en">Share Shift</span></div>
+          <div class="p-body"><div id="c-share" class="chart"></div></div>
+        </section>
+        <section class="panel" style="flex:1">
+          <div class="p-head"><span class="bar"></span><h2>人均用水量</h2><span class="en">Per Capita</span></div>
+          <div class="p-body"><div id="c-pc" class="chart"></div></div>
+        </section>
+        <section class="panel" style="flex:1">
+          <div class="p-head"><span class="bar"></span><h2>2016 vs 2024 用水对比</h2><span class="en">Compare</span></div>
+          <div class="p-body"><div id="c-cmp" class="chart"></div></div>
+        </section>
+      </div>
+    </div>
+
+    <footer>
+      <span>数据来源：国家统计局 · 年度数据</span>
+      <span>注：2012 年起生活用水量中的牲畜用水量调整至农业用水量中；生态用水仅含部分河湖、湿地人工补水和城市环境用水</span>
+    </footer>
+  </div>
+</div>
+
+<script>
+var D = {"years": ["2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024"], "supply": {"total": [6040.2, 6043.4, 6015.5, 6021.2, 5812.9, 5920.2, 5998.2, 5906.5, 5928.0], "surface": [4912.4, 4945.5, 4952.7, 4982.5, 4792.3, 4928.1, 4994.2, 4874.7, 4892.4], "ground": [1057.0, 1016.7, 976.4, 934.2, 892.5, 853.8, 828.2, 819.5, 784.0], "other": [70.8, 81.2, 86.4, 104.5, 128.1, 138.3, 175.8, 212.3, 251.6]}, "use": {"total": [6040.2, 6043.4, 6015.5, 6021.2, 5812.9, 5920.2, 5998.2, 5906.5, 5928.0], "agri": [3768.0, 3766.4, 3693.1, 3682.3, 3612.4, 3644.3, 3781.3, 3672.4, 3648.4], "industry": [1308.0, 1277.0, 1261.6, 1217.6, 1030.4, 1049.6, 968.4, 970.2, 971.0], "life": [821.6, 838.1, 859.9, 871.7, 863.1, 909.4, 905.7, 909.8, 926.8], "eco": [142.6, 161.9, 200.9, 249.6, 307.0, 316.9, 342.8, 354.1, 381.8]}, "perCapita": [435.2, 432.8, 428.8, 427.7, 411.9, 419.2, 424.7, 418.7, 420.7], "yoy": [null, 0.1, -0.5, 0.1, -3.5, 1.8, 1.3, -1.5, 0.4], "agriShare": [62.4, 62.3, 61.4, 61.2, 62.1, 61.6, 63.0, 62.2, 61.5], "groundShare": [17.5, 16.8, 16.2, 15.5, 15.4, 14.4, 13.8, 13.9, 13.2], "ecoShare": [2.36, 2.68, 3.34, 4.15, 5.28, 5.35, 5.72, 6.0, 6.44], "kpi": [{"label": "供水总量 · 2024", "value": "5928.0", "unit": "亿 m³", "delta": "同比 +0.4%", "trend": 1}, {"label": "农业用水占比 · 2024", "value": "61.5", "unit": "%", "delta": "较 2016 -0.9 pct", "trend": -1}, {"label": "生态用水量 · 2024", "value": "381.8", "unit": "亿 m³", "delta": "较 2016 +167.7%", "trend": 1}, {"label": "地下水占供水比 · 2024", "value": "13.2", "unit": "%", "delta": "较 2016 -4.3 pct", "trend": -1}], "lastYear": "2024", "firstYear": "2016"};
+
+/* ---------- 自适应缩放：1920×1080 等比铺满 ---------- */
+function fit(){
+  var s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+  document.getElementById('stage').style.transform =
+    'translate(-50%,-50%) scale(' + s + ')';
+}
+window.addEventListener('resize', fit); fit();
+
+/* ---------- 时钟 ---------- */
+function tick(){
+  var d = new Date(), p = function(v){ return String(v).padStart(2,'0'); };
+  document.getElementById('clock').textContent =
+    d.getFullYear() + '-' + p(d.getMonth()+1) + '-' + p(d.getDate()) + ' ' +
+    p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+}
+tick(); setInterval(tick, 1000);
+
+/* ---------- KPI 卡片 ---------- */
+document.getElementById('kpis').innerHTML = D.kpi.map(function(k){
+  var cls = k.trend >= 0 ? 'up' : 'down';
+  var arrow = k.trend >= 0 ? '▲' : '▼';
+  return '<div class="kpi">' +
+      '<div class="k-label">' + k.label + '</div>' +
+      '<div class="k-value">' + k.value + '<small>' + k.unit + '</small></div>' +
+      '<div class="k-delta ' + cls + '">' + arrow + ' ' + k.delta + '</div>' +
+    '</div>';
+}).join('');
+
+/* ================= 图表绘制：等 ECharts 就绪后统一初始化 ================= */
+function boot(){
+
+var C = {
+  cyan:'#00E5FF', blue:'#2E9BFF', teal:'#2BE0C8', gold:'#FFC64B',
+  green:'#4ADE80', pink:'#FF7AB6', purple:'#A78BFA', text:'#7FA6C4'
+};
+var AXIS_LABEL = { color:C.text, fontSize:12 };
+var SPLIT_LINE = { lineStyle:{ color:'rgba(120,180,220,.13)' } };
+var LEGEND = {
+  top:0, right:2, itemWidth:11, itemHeight:8, itemGap:14,
+  icon:'roundRect', textStyle:{ color:C.text, fontSize:11.5 }
+};
+var TOOLTIP = {
+  trigger:'axis',
+  backgroundColor:'rgba(6,24,42,.94)',
+  borderColor:'rgba(0,229,255,.35)',
+  borderWidth:1,
+  textStyle:{ color:'#dff1ff', fontSize:12.5 },
+  axisPointer:{ lineStyle:{ color:'rgba(0,229,255,.45)' },
+                crossStyle:{ color:'rgba(0,229,255,.45)' } }
+};
+function grad(c1, c2){
+  return new echarts.graphic.LinearGradient(0,0,0,1,[
+    { offset:0, color:c1 }, { offset:1, color:c2 }
+  ]);
+}
+function gradH(c1, c2){
+  return new echarts.graphic.LinearGradient(0,0,1,0,[
+    { offset:0, color:c1 }, { offset:1, color:c2 }
+  ]);
+}
+var charts = [];
+function draw(id, option){
+  var el = document.getElementById(id);
+  var ins = echarts.init(el, null, { renderer:'canvas' });
+  ins.setOption(option);
+  charts.push(ins);
+}
+window.addEventListener('resize', function(){
+  charts.forEach(function(c){ c.resize(); });
+});
+
+/* ============ 1. 供水结构演变（堆叠面积） ============ */
+draw('c-stack', {
+  tooltip: Object.assign({}, TOOLTIP, {
+    valueFormatter:function(v){ return v.toFixed(1) + ' 亿m³'; }
+  }),
+  legend: Object.assign({}, LEGEND, { data:['地表水','地下水','其他'] }),
+  grid: { left:6, right:14, top:38, bottom:4, containLabel:true },
+  xAxis: {
+    type:'category', data:D.years, boundaryGap:false,
+    axisLine:{ lineStyle:{ color:'rgba(0,229,255,.22)' } },
+    axisTick:{ show:false }, axisLabel: AXIS_LABEL
+  },
+  yAxis: {
+    type:'value', name:'亿m³', nameTextStyle:{ color:C.text, fontSize:11, padding:[0,0,0,-6] },
+    splitLine: SPLIT_LINE,
+    axisLine:{ show:false }, axisTick:{ show:false }, axisLabel: AXIS_LABEL
+  },
+  series: [
+    { name:'地表水', type:'line', stack:'s', smooth:true, symbol:'none',
+      data:D.supply.surface, lineStyle:{ width:1.4, color:C.cyan },
+      areaStyle:{ color: grad('rgba(0,229,255,.55)','rgba(0,229,255,.03)') } },
+    { name:'地下水', type:'line', stack:'s', smooth:true, symbol:'none',
+      data:D.supply.ground, lineStyle:{ width:1.4, color:C.gold },
+      areaStyle:{ color: grad('rgba(255,198,75,.55)','rgba(255,198,75,.03)') } },
+    { name:'其他', type:'line', stack:'s', smooth:true, symbol:'none',
+      data:D.supply.other, lineStyle:{ width:1.4, color:C.teal },
+      areaStyle:{ color: grad('rgba(43,224,200,.55)','rgba(43,224,200,.03)') } }
+  ]
+});
+
+/* ============ 2. 用水结构环形图 ============ */
+var useLast = ['农业','工业','生活','生态'].map(function(n, i){
+  var key = ['agri','industry','life','eco'][i];
+  return { name:n, value: D.use[key][D.use[key].length - 1] };
+});
+draw('c-pie', {
+  tooltip: {
+    trigger:'item', backgroundColor:'rgba(6,24,42,.94)',
+    borderColor:'rgba(0,229,255,.35)', borderWidth:1,
+    textStyle:{ color:'#dff1ff', fontSize:12.5 },
+    formatter:function(p){
+      return p.marker + p.name + '用水<br/><b>' + p.value.toFixed(1) +
+             ' 亿m³</b> （' + p.percent + '%）';
+    }
+  },
+  legend: Object.assign({}, LEGEND, {
+    orient:'vertical', right:8, top:'middle', itemGap:12, data:['农业','工业','生活','生态']
+  }),
+  color: [C.gold, C.blue, C.teal, C.green],
+  series: [{
+    type:'pie', radius:['52%','74%'], center:['36%','52%'],
+    avoidLabelOverlap:true, padAngle:2,
+    itemStyle:{ borderColor:'rgba(3,6,13,.9)', borderWidth:2, borderRadius:3 },
+    label:{ show:false },
+    emphasis:{ scale:true, scaleSize:6,
+      label:{ show:true, color:'#fff', fontSize:12, formatter:'{b}\n{d}%' } },
+    data: useLast
+  }],
+  graphic: [
+    { type:'text', left:'36%', top:'44%', style:{
+        text: useLast.reduce(function(a,b){ return a + b.value; }, 0).toFixed(0),
+        fill:'#ffffff', font:'700 26px "DIN Alternate",Bahnschrift,sans-serif',
+        textAlign:'center', textVerticalAlign:'middle',
+        shadowColor:'rgba(0,220,255,.6)', shadowBlur:16 } },
+    { type:'text', left:'36%', top:'55%', style:{
+        text:'亿m³ 总用水', fill:'#6ea8c6', font:'11px "Microsoft YaHei"',
+        textAlign:'center', textVerticalAlign:'middle' } }
+  ]
+});
+
+/* ============ 3. 供水总量与同比 ============ */
+draw('c-main', {
+  tooltip: Object.assign({}, TOOLTIP, {
+    formatter:function(ps){
+      var s = ps[0].axisValue + ' 年<br/>';
+      ps.forEach(function(p){
+        var v = p.seriesName === '同比增速'
+          ? (p.value === null ? '—' : p.value.toFixed(1) + ' %')
+          : p.value.toFixed(1) + ' 亿m³';
+        s += p.marker + p.seriesName + '：<b>' + v + '</b><br/>';
+      });
+      return s;
+    }
+  }),
+  legend: Object.assign({}, LEGEND, { data:['供水总量','同比增速'] }),
+  grid: { left:6, right:8, top:40, bottom:4, containLabel:true },
+  xAxis: {
+    type:'category', data:D.years,
+    axisLine:{ lineStyle:{ color:'rgba(0,229,255,.22)' } },
+    axisTick:{ show:false }, axisLabel: AXIS_LABEL
+  },
+  yAxis: [
+    { type:'value', name:'亿m³', min:5500, nameTextStyle:{ color:C.text, fontSize:11 },
+      splitLine: SPLIT_LINE, axisLine:{ show:false }, axisTick:{ show:false },
+      axisLabel: AXIS_LABEL },
+    { type:'value', name:'同比 %', nameTextStyle:{ color:C.gold, fontSize:11 },
+      splitLine:{ show:false }, axisLine:{ show:false }, axisTick:{ show:false },
+      axisLabel:{ color:C.gold, fontSize:12, formatter:'{value}%' } }
+  ],
+  series: [
+    { name:'供水总量', type:'bar', barWidth:'46%',
+      data:D.supply.total,
+      itemStyle:{
+        borderRadius:[3,3,0,0],
+        color: grad('rgba(0,229,255,.95)','rgba(0,110,190,.18)')
+      },
+      emphasis:{ itemStyle:{ color: grad('#7DF3FF','rgba(0,150,220,.35)') } },
+      label:{ show:true, position:'top', color:'#9fd6ea', fontSize:11,
+              formatter:function(p){ return p.value.toFixed(0); } } },
+    { name:'同比增速', type:'line', yAxisIndex:1, data:D.yoy,
+      smooth:true, symbol:'circle', symbolSize:7,
+      connectNulls:true,
+      lineStyle:{ width:2.2, color:C.gold, shadowColor:'rgba(255,198,75,.55)', shadowBlur:10 },
+      itemStyle:{ color:C.gold, borderColor:'#fff', borderWidth:1 },
+      areaStyle:{ color: grad('rgba(255,198,75,.22)','rgba(255,198,75,0)') } }
+  ]
+});
+
+/* ============ 4. 四类用水趋势 ============ */
+draw('c-trend', {
+  tooltip: Object.assign({}, TOOLTIP, {
+    valueFormatter:function(v){ return v.toFixed(1) + ' 亿m³'; }
+  }),
+  legend: Object.assign({}, LEGEND, { data:['农业','工业','生活','生态'] }),
+  grid: { left:6, right:14, top:38, bottom:4, containLabel:true },
+  xAxis: {
+    type:'category', data:D.years, boundaryGap:false,
+    axisLine:{ lineStyle:{ color:'rgba(0,229,255,.22)' } },
+    axisTick:{ show:false }, axisLabel: AXIS_LABEL
+  },
+  yAxis: {
+    type:'value', name:'亿m³', nameTextStyle:{ color:C.text, fontSize:11 },
+    splitLine: SPLIT_LINE, axisLine:{ show:false }, axisTick:{ show:false },
+    axisLabel: AXIS_LABEL
+  },
+  series: [
+    { name:'农业', type:'line', smooth:true, symbol:'circle', symbolSize:6,
+      data:D.use.agri, itemStyle:{ color:C.gold },
+      lineStyle:{ width:2.4, color:C.gold, shadowColor:'rgba(255,198,75,.5)', shadowBlur:9 } },
+    { name:'工业', type:'line', smooth:true, symbol:'circle', symbolSize:6,
+      data:D.use.industry, itemStyle:{ color:C.blue },
+      lineStyle:{ width:2.2, color:C.blue } },
+    { name:'生活', type:'line', smooth:true, symbol:'circle', symbolSize:6,
+      data:D.use.life, itemStyle:{ color:C.teal },
+      lineStyle:{ width:2.2, color:C.teal } },
+    { name:'生态', type:'line', smooth:true, symbol:'circle', symbolSize:6,
+      data:D.use.eco, itemStyle:{ color:C.green },
+      lineStyle:{ width:2.2, color:C.green, type:'dashed' },
+      areaStyle:{ color: grad('rgba(74,222,128,.30)','rgba(74,222,128,0)') } }
+  ]
+});
+
+/* ============ 5. 结构占比变化 ============ */
+draw('c-share', {
+  tooltip: Object.assign({}, TOOLTIP, {
+    valueFormatter:function(v){ return v.toFixed(1) + ' %'; }
+  }),
+  legend: Object.assign({}, LEGEND, { data:['地下水占供水比','生态用水占比','农业用水占比'] }),
+  grid: { left:6, right:52, top:38, bottom:4, containLabel:true },
+  xAxis: {
+    type:'category', data:D.years, boundaryGap:false,
+    axisLine:{ lineStyle:{ color:'rgba(0,229,255,.22)' } },
+    axisTick:{ show:false }, axisLabel: AXIS_LABEL
+  },
+  yAxis: {
+    type:'value', name:'%', splitLine: SPLIT_LINE,
+    axisLine:{ show:false }, axisTick:{ show:false },
+    nameTextStyle:{ color:C.text, fontSize:11 }, axisLabel: AXIS_LABEL
+  },
+  series: [
+    { name:'农业用水占比', type:'line', smooth:true, symbol:'none',
+      data:D.agriShare,
+      lineStyle:{ width:2.4, color:C.gold },
+      areaStyle:{ color: grad('rgba(255,198,75,.13)','rgba(255,198,75,0)') },
+      endLabel:{ show:true, color:C.gold, fontSize:11.5, distance:4,
+                 formatter:function(p){ return p.value + '%'; } } },
+    { name:'地下水占供水比', type:'line', smooth:true, symbol:'circle', symbolSize:5,
+      data:D.groundShare, itemStyle:{ color:C.cyan },
+      lineStyle:{ width:2.2, color:C.cyan, shadowColor:'rgba(0,229,255,.5)', shadowBlur:9 },
+      endLabel:{ show:true, color:C.cyan, fontSize:11.5, distance:4,
+                 formatter:function(p){ return p.value + '%'; } } },
+    { name:'生态用水占比', type:'line', smooth:true, symbol:'circle', symbolSize:5,
+      data:D.ecoShare, itemStyle:{ color:C.green },
+      lineStyle:{ width:2.2, color:C.green, type:'dashed' },
+      endLabel:{ show:true, color:C.green, fontSize:11.5, distance:4,
+                 formatter:function(p){ return p.value + '%'; } } }
+  ]
+});
+
+/* ============ 6. 人均用水量 ============ */
+draw('c-pc', {
+  tooltip: Object.assign({}, TOOLTIP, {
+    valueFormatter:function(v){ return v.toFixed(1) + ' m³/人'; }
+  }),
+  grid: { left:6, right:16, top:24, bottom:4, containLabel:true },
+  xAxis: {
+    type:'category', data:D.years,
+    axisLine:{ lineStyle:{ color:'rgba(0,229,255,.22)' } },
+    axisTick:{ show:false }, axisLabel: AXIS_LABEL
+  },
+  yAxis: {
+    type:'value', name:'m³/人', min:380,
+    nameTextStyle:{ color:C.text, fontSize:11 },
+    splitLine: SPLIT_LINE, axisLine:{ show:false }, axisTick:{ show:false },
+    axisLabel: AXIS_LABEL
+  },
+  series: [{
+    type:'bar', barWidth:'44%', data:D.perCapita,
+    itemStyle:{ borderRadius:[3,3,0,0],
+      color: function(p){
+        var last = p.dataIndex === D.perCapita.length - 1;
+        return last ? grad('#FFC64B','rgba(255,198,75,.15)')
+                    : grad('rgba(43,224,200,.9)','rgba(43,224,200,.12)');
+      } },
+    label:{ show:true, position:'top', color:'#9fd6ea', fontSize:10.5,
+            formatter:function(p){ return p.value.toFixed(0); } },
+    markLine:{
+      silent:true, symbol:'none',
+      lineStyle:{ color:'rgba(255,198,75,.75)', type:'dashed', width:1.2 },
+      label:{ color:C.gold, fontSize:11, formatter:'均值 {c}',
+              position:'insideEndTop' },
+      data:[{ type:'average' }]
+    }
+  }]
+});
+
+/* ============ 7. 首末年用水对比 ============ */
+var first = D.firstYear, last = D.lastYear;
+draw('c-cmp', {
+  tooltip: Object.assign({}, TOOLTIP, {
+    axisPointer:{ type:'shadow' },
+    valueFormatter:function(v){ return v.toFixed(1) + ' 亿m³'; }
+  }),
+  legend: Object.assign({}, LEGEND, { data:[first, last] }),
+  grid: { left:6, right:56, top:36, bottom:4, containLabel:true },
+  xAxis: {
+    type:'value', splitLine: SPLIT_LINE,
+    axisLine:{ show:false }, axisTick:{ show:false },
+    axisLabel: AXIS_LABEL
+  },
+  yAxis: {
+    type:'category', data:['生态','生活','工业','农业'],
+    axisLine:{ lineStyle:{ color:'rgba(0,229,255,.22)' } },
+    axisTick:{ show:false }, axisLabel: AXIS_LABEL
+  },
+  series: [
+    { name:first, type:'bar', barWidth:9,
+      data:[D.use.eco[0], D.use.life[0], D.use.industry[0], D.use.agri[0]],
+      itemStyle:{ borderRadius:5, color: gradH('rgba(46,155,255,.25)','#2E9BFF') },
+      label:{ show:true, position:'right', color:'#7FA6C4', fontSize:10.5,
+              formatter:function(p){ return p.value.toFixed(0); } } },
+    { name:last, type:'bar', barWidth:9,
+      data:[D.use.eco[D.use.eco.length-1], D.use.life[D.use.life.length-1],
+            D.use.industry[D.use.industry.length-1], D.use.agri[D.use.agri.length-1]],
+      itemStyle:{ borderRadius:5, color: gradH('rgba(0,229,255,.25)','#00E5FF') },
+      label:{ show:true, position:'right', color:'#c9ecfa', fontSize:10.5,
+              formatter:function(v){ return v.value.toFixed(0); } } }
+  ]
+});
+
+}  /* ===== boot() 结束 ===== */
+</script>
+
+<script>
+/* ECharts 同步加载（本地优先，失败自动回退 CDN），就绪后再绘制图表 */
+(function(){
+  var sources = ['https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js', 'https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js'];
+  var idx = 0;
+  function next(){
+    if (idx >= sources.length) {
+      document.querySelector('.main').innerHTML =
+        '<div style="grid-column:1/-1;display:flex;align-items:center;justify-content:center;' +
+        'color:#FF7AB6;font-size:16px">ECharts 加载失败：请把 echarts.min.js 放到本 HTML 同目录，或检查网络</div>';
+      return;
+    }
+    var s = document.createElement('script');
+    s.src = sources[idx++];
+    s.onload = function(){ try { boot(); } catch (e) { console.error(e); } };
+    s.onerror = next;
+    document.head.appendChild(s);
+  }
+  next();
+})();
+</script>
+</body>
+</html>
