@@ -1,0 +1,184 @@
+"""
+第3章 动态图表 —— 表2：动态跑道图
+"""
+import json
+from pathlib import Path
+HERE = Path(__file__).resolve().parent
+JS = HERE / "echarts.min.js"
+
+# ---------- 源数据（原表 B3:F9）：6 部门 × 4 个月 ----------
+months = ["1月", "2月", "3月", "4月"]
+depts = ["人力部", "行政部", "财务部", "工程部", "采购部", "销售部"]
+data = {
+    "1月": [130, 226, 238, 293, 326, 451],
+    "2月": [138, 206, 228, 305, 349, 456],
+    "3月": [130, 217, 255, 314, 316, 406],
+    "4月": [129, 226, 226, 264, 359, 433],   # 合计 1637（与目标截图一致）
+}
+DEFAULT_MONTH = "4月"
+
+BG       = "#1a1d3a"      
+TITLE_C  = "#c9d3f5"      
+LABEL_C  = "#dfe6ff"      
+NOTE_C   = "#8b93b8"     
+
+# 同心环颜色
+COLORS = ["#ef4b64", "#f9be3d", "#18a5a5", "#3d9de0", "#1f7fc9", "#7b3fb5"]
+# 半径
+radii = [["63%", "67%"], ["57%", "61%"], ["51%", "55%"],
+         ["45%", "49%"], ["39%", "43%"], ["33%", "37%"]]
+CENTER = ["46%", "55%"]   
+
+def build_series(vals):
+    """生成 6 条同心跑道。外环(人数少)弧长更长，内环(人数多)弧长更短 —— 与目标图一致。"""
+    maxv, minv = max(vals), min(vals)
+    span = maxv - minv or 1
+    series = []
+    for i, (dept, v) in enumerate(zip(depts, vals)):
+        real_deg = 60 + 130 * (maxv - v) / span
+        series.append({
+            "type": "pie",
+            "name": dept,
+            "radius": radii[i],
+            "center": CENTER,
+            "startAngle": 90,
+            "clockwise": True,
+            "avoidLabelOverlap": False,
+            "label": {"show": False},
+            "labelLine": {"show": False},
+            "emphasis": {"disabled": True},
+            "data": [
+                {"value": round(real_deg, 2), "name": dept,
+                 "itemStyle": {"color": COLORS[i]}},
+                {"value": round(360 - real_deg, 2), "name": "",
+                 "itemStyle": {"color": "rgba(0,0,0,0)"}},
+            ],
+        })
+    return series
+
+series_map = {m: build_series(data[m]) for m in months}
+totals = {m: sum(data[m]) for m in months}
+labels_map = {m: [[d, v] for d, v in zip(depts, data[m])] for m in months}
+
+title_text = "%s公司总人数为%d" % (DEFAULT_MONTH, totals[DEFAULT_MONTH])
+option = {
+    "backgroundColor": BG,
+    "animationDuration": 800,
+    "title": {
+        "text": title_text,
+        "left": "5%", "top": "5%",
+        "textStyle": {"color": TITLE_C, "fontSize": 34, "fontWeight": "normal",
+                      "fontFamily": "Microsoft YaHei, PingFang SC, sans-serif"},
+    },
+    "tooltip": {
+        "trigger": "item",
+        "formatter": "{b}: {c}",
+        "backgroundColor": "rgba(20,25,55,0.9)",
+        "textStyle": {"color": "#fff"},
+    },
+    "series": series_map[DEFAULT_MONTH],
+}
+
+select_html = "".join(
+    '<option value="%s"%s>%s</option>' % (m, " selected" if m == DEFAULT_MONTH else "", m)
+    for m in months
+)
+
+# ---------- 按每条环的半径计算标签垂直位置，保证与跑道一一对齐 ----------
+CHART_W, CHART_H = 1000, 700
+half = min(CHART_W, CHART_H) / 2.0                 
+cy = float(CENTER[1].rstrip("%")) / 100 * CHART_H  
+label_rows = []
+for i, (rin, rout) in enumerate(radii):
+    mid_pct = (float(rin.rstrip("%")) + float(rout.rstrip("%"))) / 2
+    top_px = cy - mid_pct / 100 * half - 8          
+    label_rows.append(
+        '<div class="lbl" style="top:%.1fpx"><span>%s</span>&nbsp;&nbsp;'
+        '<b id="v%d">%d</b></div>' % (top_px, depts[i], i, data[DEFAULT_MONTH][i])
+    )
+label_rows_html = "".join(label_rows)
+
+option_json      = json.dumps(option, ensure_ascii=False)
+series_map_json  = json.dumps(series_map, ensure_ascii=False)
+totals_json      = json.dumps(totals, ensure_ascii=False)
+labels_map_json  = json.dumps(labels_map, ensure_ascii=False)
+
+echarts_js = JS.read_text(encoding="utf-8") if JS.exists() else ""
+
+html = """<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>动态跑道图 · 下拉控件</title>
+<style>
+  html,body{margin:0;padding:0;background:%(bg)s;}
+  #wrap{position:relative;width:1000px;height:700px;margin:0 auto;background:%(bg)s;}
+  #chart{width:1000px;height:700px;}
+  #sel{position:absolute;top:58px;right:60px;z-index:10;
+       font-size:16px;color:%(title_c)s;padding:2px 4px;
+       background:transparent;border:none;cursor:pointer;outline:none;
+       font-family:Microsoft YaHei,PingFang SC,sans-serif;}
+  #sel option{color:#222;}
+  /* 左侧部门数值标签：每行 top 由对应环半径计算，精确对齐跑道 */
+  #labels{position:absolute;inset:0;z-index:5;}
+  .lbl{position:absolute;right:55%%;width:210px;text-align:right;
+       font-size:12px;line-height:16px;color:%(label_c)s;
+       font-family:Microsoft YaHei,PingFang SC,sans-serif;letter-spacing:.5px;}
+  .lbl b{font-weight:normal;}
+  #note{position:absolute;left:5%%;bottom:18px;color:%(note_c)s;font-size:13px;
+        font-family:Microsoft YaHei,PingFang SC,sans-serif;}
+</style>
+<script>%(echarts)s</script>
+</head>
+<body>
+<div id="wrap">
+  <div id="chart"></div>
+  <select id="sel">%(select)s</select>
+  <div id="labels">%(labelrows)s</div>
+  <div id="note">*注：数据来源公司人力资源系统</div>
+</div>
+<script>
+var chart = echarts.init(document.getElementById('chart'));
+chart.setOption(%(option)s);
+var seriesMap = %(seriesmap)s;
+var totals    = %(totals)s;
+var labelsMap = %(labelsmap)s;
+
+function renderMonth(m) {
+  // 跑道弧长
+  chart.setOption({series: seriesMap[m]});
+  // 标题：M月公司总人数为N
+  chart.setOption({title: {text: m + '公司总人数为' + totals[m]}});
+  // 左侧部门数值标签：只更新数值，位置保持与对应环对齐
+  var rows = labelsMap[m];
+  for (var i = 0; i < rows.length; i++) {
+    document.getElementById('v' + i).textContent = rows[i][1];
+  }
+}
+renderMonth('%(default)s');
+
+// 下拉框（对应 Excel 控件单元格 Q5/G17）
+document.getElementById('sel').onchange = function () {
+  renderMonth(this.value);
+};
+</script>
+</body>
+</html>
+""" % {
+    "bg": BG,
+    "title_c": TITLE_C,
+    "label_c": LABEL_C,
+    "note_c": NOTE_C,
+    "echarts": echarts_js,
+    "select": select_html,
+    "option": option_json,
+    "seriesmap": series_map_json,
+    "totals": totals_json,
+    "labelsmap": labels_map_json,
+    "labelrows": label_rows_html,
+    "default": DEFAULT_MONTH,
+}
+
+out = HERE / "02_动态跑道图.html"
+out.write_text(html, encoding="utf-8")
+print("OK ->", out)
